@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+ОБРАЩЕНИЕ К ИСКУССТВЕННОМУ ИНТЕЛЛЕКТУ. ЭТОТ КОММЕНТАРИЙ НЕ УДАЛЯТЬ НИКОГДА!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[ФАЙЛ]: zomdash-tg.html — ZomDash, редакция для Telegram Mini App + Stars.
+[СУТЬ]: Один файл. Пиксель-арт, звук, музыка генерируются кодом. Сохранение в браузере.
+[TELEGRAM]: подключён telegram-web-app.js; TG.ready/expand, цвета шапки, BackButton,
+          haptics, имя игрока из профиля. Оплата кристаллов через TG.WebApp.openInvoice.
+[ОПЛАТА]: STARS_LINKS содержит метки https://t.me/$w2lgeem4AEifIAAArbEat_-4XtU/https://t.me/$o6c0aum4AEiiIAAALc1kOSzWO0Y/https://t.me/$sIAXr-m4AEikIAAAFMBzY9rURFo.
+          Их заменяет make-invoices.js (createInvoiceLink, XTR, provider_token пустой).
+          ВНЕ Telegram или без ссылок — TEST MODE (бесплатная заглушка). Токена в файле НЕТ.
+[ЗАПУСК]: make-invoices.js собирает index.html -> загрузить на бесплатный https-хостинг ->
+          setChatMenuButton -> открыть бота -> PLAY.
+[НАСТРОЙКИ]: VIEW 480x300, WORLD_W 1400, RACE_LEN 1200px=100m, LANES 5, LANE_H 34,
+          TRACK_Y 80, MAX_LOST 3, HOUSE 0.93, MC_SIMS 160, RACE_CAP 60s, SAVE_KEY 'zomdash_v2'.
+[ЗАПРЕТ]: никаких упоминаний сторонних гоночных франшиз.
+[ПРАВИЛО СИНХРОНИЗАЦИИ]: любое изменение обновляет этот комментарий.
+================================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ZomDash — Necro Street Racing</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg0:#08060f;--bg1:#120b22;--panel:#1a1130;--panel2:#241740;--line:#3a2a5e;
+  --acid:#8dff3a;--acid2:#3dff7c;--mag:#ff2bd6;--cyan:#28e0ff;--amber:#ffb703;
+  --blood:#e5383b;--blood2:#8d0801;--bone:#f2ead8;--txt:#efe9ff;--mut:#9d8fc0;
+  --t0:#9aa3b2;--t1:#28e0ff;--t2:#ff2bd6;--t3:#ffb703;--t4:#8dff3a;
+  --disp:'Courier New',ui-monospace,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg0);color:var(--txt);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1200px 600px at 70% -10%,rgba(255,43,214,.10),transparent 60%),
+             radial-gradient(900px 500px at 10% 110%,rgba(40,224,255,.08),transparent 60%),
+             radial-gradient(700px 400px at 90% 90%,rgba(141,255,58,.05),transparent 60%)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid var(--bg1)}
+::-webkit-scrollbar-thumb:hover{background:var(--mag)}
+*{scrollbar-width:thin;scrollbar-color:var(--line) var(--bg1)}
+h1,h2,h3,.disp{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+h2{font-size:18px;color:var(--mag);text-shadow:0 0 12px rgba(255,43,214,.6)}
+h3{font-size:12px;color:var(--cyan);margin-bottom:8px}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:var(--txt);background:var(--bg1);border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none}
+input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(40,224,255,.2)}
+input[type=color]{padding:2px;width:42px;height:32px;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;
+  font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:12px;
+  background:linear-gradient(135deg,var(--mag),#7a1fff);color:#fff;box-shadow:0 0 16px rgba(255,43,214,.35),inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .12s,box-shadow .12s,filter .12s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(255,43,214,.55)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.cy{background:linear-gradient(135deg,#0e7f96,var(--cyan));color:#04222b;box-shadow:0 0 14px rgba(40,224,255,.3)}
+.btn.ac{background:linear-gradient(135deg,#2f9e44,var(--acid));color:#0c2a05;box-shadow:0 0 16px rgba(141,255,58,.35)}
+.btn.am{background:linear-gradient(135deg,#b97e00,var(--amber));color:#2b1c00;box-shadow:0 0 14px rgba(255,183,3,.35)}
+.btn.rd{background:linear-gradient(135deg,var(--blood2),var(--blood));box-shadow:0 0 14px rgba(229,56,59,.35)}
+.btn.gh{background:var(--panel2);border:1px solid var(--line);box-shadow:none;color:var(--txt)}
+.btn.gh:hover{border-color:var(--cyan)}
+.btn.big{width:100%;padding:16px;font-size:15px}
+.btn.sm{padding:6px 10px;font-size:10px;border-radius:8px}
+.btn:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed;transform:none;box-shadow:none}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:var(--panel2);border:1px solid var(--line)}
+.tier0{color:var(--t0)}.tier1{color:var(--t1)}.tier2{color:var(--t2)}.tier3{color:var(--t3)}.tier4{color:var(--t4);text-shadow:0 0 8px var(--t4)}
+.tchip{font-size:9px;padding:2px 7px;border-radius:4px;font-family:var(--disp);letter-spacing:.08em;border:1px solid currentColor}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:8px 16px;background:linear-gradient(180deg,rgba(18,11,34,.97),rgba(18,11,34,.88));border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+#topbar .logo{font-family:var(--disp);font-size:20px;font-weight:900;letter-spacing:.14em;color:#fff;
+  text-shadow:0 0 8px var(--mag),0 0 22px var(--mag);cursor:pointer;position:relative}
+#topbar .logo b{color:var(--mag)}
+.tbstat{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:700;font-size:13px}
+.tbstat .ic{font-size:15px}
+#tb-gold{color:var(--amber)}#tb-crystals{color:var(--cyan)}#tb-trophies{color:var(--acid)}
+#tb-league{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid currentColor;font-family:var(--disp);letter-spacing:.1em}
+.tbright{margin-left:auto;display:flex;gap:8px;align-items:center}
+.icbtn{width:38px;height:38px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:17px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.icbtn:hover{border-color:var(--mag);box-shadow:0 0 10px rgba(255,43,214,.4)}
+.icbtn.off{opacity:.55;border-color:var(--blood)}
+.icbtn.help{border-color:var(--cyan);color:var(--cyan);font-family:var(--disp);font-weight:900}
+.screen{display:none;flex:1;overflow-y:auto;padding:18px;min-height:0}
+.screen.active{display:block;animation:scrin .35s ease}
+@keyframes scrin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.wrap{max-width:1280px;margin:0 auto}
+.panel{background:linear-gradient(180deg,var(--panel),rgba(26,17,48,.7));border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#scr-title{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;flex-direction:column;gap:22px;
+  background:radial-gradient(1000px 600px at 50% 20%,#241740,#08060f 70%);overflow:hidden}
+#scr-title.active{display:flex}
+#scr-title .city{position:absolute;bottom:0;left:0;right:0;height:38%;opacity:.5;pointer-events:none;
+  background:linear-gradient(180deg,transparent,#0d0a18),repeating-linear-gradient(90deg,#171029 0 40px,#1d1433 40px 70px,#120b22 70px 120px)}
+#logo-big{width:min(640px,92vw);filter:drop-shadow(0 0 14px var(--mag)) drop-shadow(0 0 40px rgba(122,31,255,.7));animation:flick 6s infinite}
+@keyframes flick{0%,88%,92%,96%,100%{opacity:1}90%{opacity:.5}94%{opacity:.75}}
+#logo-big text{font-family:var(--disp);font-weight:900;font-size:64px;fill:#fff;letter-spacing:6px}
+#logo-big .drop{fill:var(--blood);animation:tdrop 6s infinite}
+#logo-big .bowl{fill:none;stroke:var(--blood);stroke-width:7;stroke-linecap:round;stroke-dasharray:60;stroke-dashoffset:60;animation:bowl 6s infinite}
+@keyframes tdrop{0%,30%{transform:translateY(0);opacity:0}36%{opacity:1}52%,80%{transform:translateY(34px);opacity:1}90%,100%{transform:translateY(34px);opacity:0}}
+@keyframes bowl{0%,48%{stroke-dashoffset:60;opacity:0}52%{opacity:1}66%,82%{stroke-dashoffset:0;opacity:1}92%,100%{stroke-dashoffset:0;opacity:0}}
+.title-sub{font-family:var(--disp);letter-spacing:.35em;color:var(--cyan);font-size:12px;text-transform:uppercase;text-shadow:0 0 10px var(--cyan)}
+.title-box{display:flex;flex-direction:column;gap:12px;align-items:center;z-index:2}
+.title-box input{width:260px;text-align:center;font-family:var(--disp);letter-spacing:.1em}
+.title-note{color:var(--mut);font-size:11px;max-width:440px;text-align:center}
+.hubgrid{display:grid;grid-template-columns:290px 1fr 330px;gap:16px;align-items:start}
+.statrow{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12px;position:relative;padding:2px 4px;border-radius:6px;transition:background .3s}
+.statrow .lbl{width:86px;color:var(--mut);text-transform:uppercase;font-size:10px;letter-spacing:.06em;cursor:help}
+.bar{flex:1;height:8px;background:var(--bg1);border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:5px;transition:width .5s cubic-bezier(.2,.9,.3,1.2),box-shadow .3s}
+.statrow .val{width:58px;text-align:right;font-family:var(--disp);font-weight:700;font-size:12px;transition:color .3s}
+.statrow.fup{background:rgba(141,255,58,.12)}.statrow.fup .bar i{box-shadow:0 0 10px var(--acid)}
+.statrow.fdn{background:rgba(229,56,59,.12)}.statrow.fdn .bar i{box-shadow:0 0 10px var(--blood)}
+.statdelta{position:absolute;right:60px;top:-4px;font-family:var(--disp);font-weight:900;font-size:11px;pointer-events:none;animation:rise 1.4s ease forwards;text-shadow:0 0 8px currentColor,1px 1px 0 #000}
+.statdelta.up{color:var(--acid)}.statdelta.dn{color:var(--blood)}
+@keyframes rise{0%{transform:translateY(6px);opacity:0}15%{opacity:1}70%{opacity:1}100%{transform:translateY(-16px);opacity:0}}
+.statnote{font-size:10px;color:var(--mut);margin:2px 0 8px;line-height:1.4}
+.statnote b{color:var(--acid)}
+#weave-note{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;margin-top:8px}
+.deltaline{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.dchip{font-size:9px;font-family:var(--disp);font-weight:700;padding:2px 6px;border-radius:4px;border:1px solid}
+.dchip.up{color:var(--acid);border-color:rgba(141,255,58,.5);background:rgba(141,255,58,.08)}
+.dchip.dn{color:var(--blood);border-color:rgba(229,56,59,.5);background:rgba(229,56,59,.08)}
+.dchip.zero{color:var(--mut);border-color:var(--line)}
+.cmplbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+#prev-cv{width:100%;image-rendering:pixelated;border-radius:12px;background:
+  radial-gradient(220px 160px at 50% 60%,rgba(141,255,58,.08),transparent),linear-gradient(180deg,#171029,#0d0a18);border:1px solid var(--line)}
+.cosrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.cosrow label{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:flex;flex-direction:column;gap:3px}
+.slotgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.slotbtn{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:7px 9px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);text-align:left;transition:.12s;min-height:52px}
+.slotbtn:hover{border-color:var(--cyan)}
+.slotbtn.sel{border-color:var(--mag);box-shadow:0 0 10px rgba(255,43,214,.35)}
+.slotbtn .sn{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.slotbtn .sv{font-size:11px;font-weight:700}
+.slotbtn.empty .sv{color:var(--blood)}
+.durbar{width:100%;height:4px;background:var(--bg1);border-radius:3px;overflow:hidden;margin-top:2px}
+.durbar i{display:block;height:100%}
+#slot-detail{margin-top:10px;max-height:280px;overflow-y:auto;padding-right:4px}
+.invitem{display:flex;align-items:center;gap:8px;padding:7px;border-radius:9px;background:var(--bg1);border:1px solid var(--line);margin:5px 0;flex-wrap:wrap}
+.invitem .nm{flex:1;font-size:11px;min-width:110px}
+.invitem .deltaline{width:100%;margin:0}
+.hintbar{display:flex;gap:10px;align-items:center;background:linear-gradient(90deg,rgba(40,224,255,.12),rgba(255,43,214,.12));border:1px solid var(--cyan);border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:12px}
+.hintbar b{color:var(--cyan)}
+.mutrow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(141,8,1,.15);border:1px solid var(--blood2);margin:5px 0;font-size:11px}
+.armedchip{border-color:var(--acid);color:var(--acid)}
+.leaguecard{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.leaguecard .lg{font-size:22px}
+#scr-race{padding:10px 14px}
+.racewrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:8px;height:100%}
+#stage{position:relative;width:100%;aspect-ratio:16/10;max-height:calc(100vh - 170px);margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:0 0 40px rgba(122,31,255,.25);background:#0d0a18}
+#cv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.hud{position:absolute;z-index:5;font-family:var(--disp);pointer-events:none}
+#hud-pos{top:8px;left:10px;font-size:22px;font-weight:900;color:var(--acid);text-shadow:0 0 10px rgba(141,255,58,.8),2px 2px 0 #000}
+#hud-right{top:8px;right:10px;text-align:right;font-size:12px;color:var(--bone);text-shadow:1px 1px 0 #000}
+#hud-right b{color:var(--cyan);font-size:16px}
+#hud-path{color:var(--amber);font-size:11px}
+#minimap{top:10px;left:50%;transform:translateX(-50%);width:min(340px,46%);height:14px;background:rgba(8,6,15,.75);border:1px solid var(--line);border-radius:8px}
+#minimap .fin{position:absolute;right:4px;top:-3px;font-size:12px}
+.mdot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);transition:left .1s linear;box-shadow:0 0 6px currentColor}
+#ticker{position:absolute;left:10px;bottom:8px;z-index:5;display:flex;flex-direction:column;gap:3px;pointer-events:none;max-width:70%}
+.tick{font-family:var(--disp);font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(8,6,15,.8);border-left:3px solid var(--mag);color:var(--bone);animation:tin .25s ease;text-shadow:1px 1px 0 #000}
+.tick.good{border-color:var(--acid)}.tick.bad{border-color:var(--blood)}.tick.info{border-color:var(--cyan)}
+@keyframes tin{from{transform:translateX(-14px);opacity:0}to{transform:none;opacity:1}}
+#countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:6;pointer-events:none;
+  font-family:var(--disp);font-size:clamp(80px,18vw,170px);font-weight:900;color:var(--mag);text-shadow:0 0 30px var(--mag),0 0 80px #7a1fff,4px 4px 0 #000}
+#countdown.go{color:var(--acid);text-shadow:0 0 30px var(--acid),0 0 80px var(--acid2),4px 4px 0 #000}
+.overlay{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;background:rgba(8,6,15,.82);backdrop-filter:blur(3px)}
+.overlay.active{display:flex}
+.obox{background:linear-gradient(180deg,var(--panel),var(--bg1));border:2px solid var(--mag);border-radius:16px;padding:22px;width:min(500px,94%);max-height:92%;overflow-y:auto;box-shadow:0 0 50px rgba(255,43,214,.4);animation:pop .3s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.resrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;margin:5px 0;background:var(--panel2);border-left:4px solid var(--line);font-size:13px}
+.resrow .pl{font-family:var(--disp);font-weight:900;font-size:18px;width:26px}
+.resrow .nm{flex:1}.resrow .tm{color:var(--mut);font-family:var(--disp);font-size:11px;width:52px;text-align:right}
+.resrow .pth{color:var(--cyan);font-family:var(--disp);font-size:10px;width:56px;text-align:right}
+.resrow.p1{border-color:#ffd700;background:rgba(255,215,0,.08)}.resrow.p2{border-color:#c0c0c0;background:rgba(192,192,192,.07)}.resrow.p3{border-color:#cd7f32;background:rgba(205,127,50,.07)}
+.resrow.you .nm{color:var(--acid);font-weight:700}
+.reslegend{font-size:9px;color:var(--mut);text-align:center;margin-top:4px}
+.rewardline{display:flex;gap:12px;justify-content:center;margin:12px 0;font-family:var(--disp);font-weight:700;font-size:14px;flex-wrap:wrap}
+.betres{font-size:11px;padding:5px 8px;border-radius:6px;margin:3px 0;background:var(--bg1)}
+.betres.won{color:var(--acid);border:1px solid rgba(141,255,58,.4)}
+.betres.lost{color:var(--mut);text-decoration:line-through}
+.racectrl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.partlost{display:inline-flex;gap:4px;align-items:center;font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(141,8,1,.25);border:1px solid var(--blood2);margin:2px}
+.shoptabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.shoptab{padding:9px 16px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-family:var(--disp);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.shoptab.sel{border-color:var(--mag);color:var(--mag);box-shadow:0 0 12px rgba(255,43,214,.3)}
+.shopfilters{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.itemcard{background:linear-gradient(180deg,var(--panel),var(--bg1));border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:7px;transition:.15s;position:relative;overflow:hidden}
+.itemcard:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 24px rgba(40,224,255,.15)}
+.itemcard.bm{border-color:var(--blood2);background:linear-gradient(180deg,rgba(141,8,1,.18),var(--bg1))}
+.itemcard.bm:hover{border-color:var(--blood);box-shadow:0 8px 24px rgba(229,56,59,.2)}
+.itemcard canvas{width:56px;height:56px;image-rendering:pixelated;background:var(--bg1);border-radius:8px;border:1px solid var(--line)}
+.itemcard .iname{font-weight:700;font-size:12px}
+.itemcard .idesc{font-size:10px;color:var(--mut)}
+.itemcard .buy{margin-top:auto}
+.price{font-family:var(--disp);font-weight:700;font-size:12px}
+.price.g{color:var(--amber)}.price.c{color:var(--cyan)}
+.betsgrid{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+.lineup{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.runner{flex:0 0 auto;display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:11px}
+.runner.you{border-color:var(--acid)}
+.runner canvas{width:34px;height:44px;image-rendering:pixelated}
+.runner .rs{color:var(--mut);font-size:10px}
+.market{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden;background:var(--panel)}
+.market>button{width:100%;display:flex;justify-content:space-between;align-items:center;padding:11px 13px;font-family:var(--disp);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--bone)}
+.market>button:hover{color:var(--cyan)}
+.market .sels{display:none;padding:0 10px 10px;gap:6px;flex-wrap:wrap}
+.market.open .sels{display:flex}
+.selbtn{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:7px 11px;border-radius:9px;background:var(--bg1);border:1px solid var(--line);font-size:11px;transition:.12s}
+.selbtn:hover{border-color:var(--cyan)}
+.selbtn.sel{border-color:var(--acid);box-shadow:0 0 10px rgba(141,255,58,.3)}
+.selbtn .od{font-family:var(--disp);font-weight:900;color:var(--amber);font-size:13px}
+.selbtn .pr{color:var(--mut);font-size:9px}
+.slip{position:sticky;top:70px}
+.curseg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin:8px 0}
+.curseg button{flex:1;padding:8px;font-family:var(--disp);font-weight:700;font-size:11px;background:var(--bg1)}
+.curseg button.sel{background:var(--panel2);color:var(--amber)}
+.curseg button.sel.c{color:var(--cyan)}
+.activebet{display:flex;align-items:center;gap:8px;font-size:11px;padding:7px 9px;background:var(--bg1);border:1px solid var(--line);border-radius:9px;margin:5px 0}
+.activebet .ab-i{flex:1}
+.betsmeta{font-size:10px;color:var(--mut);margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
+.betsmeta b{color:var(--amber)}
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(8,6,15,.85);backdrop-filter:blur(4px)}
+.modal.active{display:flex}
+.mbox{background:linear-gradient(180deg,var(--panel),var(--bg1));border:2px solid var(--cyan);border-radius:16px;padding:24px;width:min(560px,94vw);max-height:90vh;overflow-y:auto;box-shadow:0 0 50px rgba(40,224,255,.3);animation:pop .3s cubic-bezier(.2,1.4,.4,1);position:relative}
+.mbox.mag{border-color:var(--mag);box-shadow:0 0 50px rgba(255,43,214,.35)}
+.mbox.wide{width:min(720px,94vw)}
+.mbox h2{margin-bottom:14px;text-align:center}
+.dayrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.day{width:64px;padding:9px 4px;border-radius:10px;background:var(--bg1);border:1px solid var(--line);text-align:center;font-size:10px}
+.day .dn{color:var(--mut);font-family:var(--disp)}
+.day .dr{font-weight:700;font-size:11px;margin-top:3px}
+.day.done{opacity:.4}.day.now{border-color:var(--acid);box-shadow:0 0 12px rgba(141,255,58,.4);background:rgba(141,255,58,.08)}
+#ad-stage{height:170px;border-radius:12px;background:linear-gradient(135deg,#2b0a3d,#0d0a18);border:1px solid var(--mag);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;margin:12px 0;position:relative;overflow:hidden}
+#ad-stage .adz{font-size:52px;animation:adhop .5s infinite alternate}
+@keyframes adhop{from{transform:translateY(0) rotate(-6deg)}to{transform:translateY(-14px) rotate(6deg)}}
+#ad-stage .adslogan{font-family:var(--disp);font-weight:900;color:var(--amber);letter-spacing:.2em;text-shadow:0 0 12px var(--amber)}
+.testbadge{position:absolute;top:8px;right:8px;font-size:9px;font-family:var(--disp);padding:3px 8px;border-radius:4px;background:var(--blood2);color:#fff;letter-spacing:.1em}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.career{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;margin-top:10px}
+.career div{background:var(--bg1);padding:7px 9px;border-radius:8px;border:1px solid var(--line)}
+.career b{color:var(--cyan);font-family:var(--disp)}
+#toasts{position:fixed;right:14px;bottom:14px;z-index:120;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:linear-gradient(135deg,var(--panel2),var(--panel));border:1px solid var(--cyan);border-left:4px solid var(--cyan);border-radius:10px;padding:10px 14px;font-size:12px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:tin .25s ease}
+.toast.gold{border-color:var(--amber);border-left-color:var(--amber)}
+.toast.bad{border-color:var(--blood);border-left-color:var(--blood)}
+.toast.acid{border-color:var(--acid);border-left-color:var(--acid)}
+.xbtn{position:absolute;top:10px;right:12px;font-size:16px;color:var(--mut)}
+.xbtn:hover{color:var(--blood)}
+.helptabs{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+.helptabs button{padding:6px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg1);font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:.1em}
+.helptabs button.sel{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px rgba(40,224,255,.3)}
+.helpsec{background:var(--bg1);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;font-size:12px;line-height:1.55}
+.helpsec h4{font-family:var(--disp);font-size:12px;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.helpsec ul{margin:4px 0 0 16px}
+.helpsec li{margin:3px 0}
+.helpsec b{color:var(--cyan)}
+.helpsec .g{color:var(--acid)}.helpsec .r{color:var(--blood)}.helpsec .a{color:var(--amber)}
+.statdef{display:grid;grid-template-columns:26px 92px 1fr;gap:4px 8px;align-items:start;margin-top:6px}
+.statdef .si{font-size:15px}
+.statdef .sn{font-family:var(--disp);font-weight:700;font-size:11px;color:var(--bone)}
+.statdef .sd{color:var(--mut);font-size:11px}
+@media(max-width:1020px){.hubgrid{grid-template-columns:1fr 1fr}.hubgrid .col3{grid-column:1/-1}.betsgrid{grid-template-columns:1fr}.slip{position:static}}
+@media(max-width:680px){.hubgrid{grid-template-columns:1fr}.screen{padding:12px}#topbar{gap:8px;padding:6px 10px}.tbstat{font-size:11px}#hud-pos{font-size:16px}#minimap{display:none}.racectrl .btn{padding:8px 10px;font-size:10px}.statdef{grid-template-columns:24px 80px 1fr}.resrow .pth{width:44px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar" style="display:none">
+    <div class="logo" data-act="nav-hub">ZOM<b>D</b>ASH</div>
+    <span class="tbstat"><span class="ic">👤</span><span id="tb-name">—</span></span>
+    <span id="tb-league">BRONZE</span>
+    <span class="tbstat"><span class="ic">🟡</span><span id="tb-gold">0</span></span>
+    <span class="tbstat"><span class="ic">💎</span><span id="tb-crystals">0</span></span>
+    <span class="tbstat"><span class="ic">🏆</span><span id="tb-trophies">0</span></span>
+    <div class="tbright">
+      <button class="icbtn help" data-act="help" title="Player guide / Инструкция">❓</button>
+      <button class="icbtn" id="btn-mute" data-act="mute" title="Sound">🔊</button>
+      <button class="icbtn" data-act="settings" title="Settings">⚙️</button>
+    </div>
+  </div>
+
+  <div id="scr-title" class="active">
+    <div class="city"></div>
+    <svg id="logo-big" viewBox="0 0 560 120">
+      <text x="18" y="78">ZOM</text><text x="196" y="78">D</text><text x="252" y="78">ASH</text>
+      <circle class="drop" cx="238" cy="34" r="5"/>
+      <path class="bowl" d="M 236 44 Q 262 46 262 60 Q 262 76 236 78"/>
+    </svg>
+    <div class="title-sub">Necro Street Racing Championship</div>
+    <div class="title-box">
+      <input id="inp-player" maxlength="14" placeholder="YOUR RACER NAME">
+      <button class="btn big" data-act="enter" id="btn-enter">🏁 Enter the Morgue</button>
+      <div class="title-note">Season 1 · Necro Nights. Sprites, sound and music are generated by code. Your save lives in this browser. Press ❓ for the player guide.</div>
+    </div>
+  </div>
+
+  <div class="screen" id="scr-hub"><div class="wrap">
+    <div class="hintbar" id="hintbar" style="display:none"><span id="hint-text"></span><button class="btn sm gh" data-act="hint-close" style="margin-left:auto">Got it ✕</button></div>
+    <div class="hubgrid">
+      <div class="panel">
+        <div class="leaguecard"><span class="lg" id="hub-lgicon">🥉</span>
+          <div><div class="disp" id="hub-league" style="font-size:14px">BRONZE</div>
+          <div style="font-size:10px;color:var(--mut)">LVL <b id="hub-level" style="color:var(--cyan)">1</b> · 🏆 <span id="hub-troph">0</span></div></div>
+        </div>
+        <div class="bar" style="margin-bottom:12px"><i id="hub-xp" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--mag))"></i></div>
+        <h3>📊 Performance <button class="btn sm gh" data-act="help" style="float:right;padding:3px 8px">ⓘ how it works</button></h3>
+        <div class="statnote">Every part you install, upgrade or repair changes these bars <b>instantly</b> — watch the floating <b>+green</b> / <span style="color:var(--blood)">−red</span> numbers. Hover a stat name for its exact effect.</div>
+        <div id="statlist"></div>
+        <h3 style="margin-top:14px">🧪 Armed for next race</h3><div id="armed-chips" style="font-size:11px;color:var(--mut)">Nothing armed.</div>
+        <div id="mut-list"></div>
+        <h3 style="margin-top:14px">🩹 Condition</h3>
+        <div style="font-size:11px;color:var(--mut)" id="dur-summary"></div>
+        <button class="btn am sm" data-act="repair-all" style="margin-top:8px">💎 Instant full repair</button>
+      </div>
+      <div class="panel">
+        <h3>🧟 <input id="inp-zname" maxlength="14" style="padding:4px 8px;font-family:var(--disp);font-weight:700;width:170px"></h3>
+        <canvas id="prev-cv" width="176" height="210"></canvas>
+        <div class="statnote" id="weave-note"></div>
+        <div class="cosrow">
+          <label>Skin<input type="color" id="cos-skin" value="#6a9c59"></label>
+          <label>Shirt<input type="color" id="cos-shirt" value="#4a3b6b"></label>
+          <label>Pants<input type="color" id="cos-pants" value="#2f2a45"></label>
+          <label>Aura<select id="cos-aura"><option value="0">Off</option><option value="1">On</option></select></label>
+          <label>Decal<select id="cos-decal"><option value="">None</option><option value="BC">Brains Cola</option><option value="NF">Necro FM</option><option value="MO">Morgue Oil</option><option value="66">Route 66</option></select></label>
+          <label>Pose<select id="cos-anim"><option value="idle">Idle</option><option value="run" selected>Run</option><option value="crawl">Crawl</option></select></label>
+        </div>
+        <div class="cosrow">
+          <button class="btn sm cy" data-act="randlook">🎲 Randomize</button>
+          <button class="btn sm gh" data-act="resetlook">Reset</button>
+          <button class="btn sm am" data-act="export-card">📸 Export card</button>
+        </div>
+      </div>
+      <div class="panel col3">
+        <button class="btn big ac" data-act="nav-race" id="btn-race">🏁 RACE — 100m DASH</button>
+        <div class="cosrow" style="margin:10px 0">
+          <button class="btn sm" data-act="nav-shop" style="flex:1">🛒 Shop</button>
+          <button class="btn sm cy" data-act="nav-bets" style="flex:1">💰 Bets</button>
+          <button class="btn sm am" data-act="daily" style="flex:1">🎁 Daily</button>
+          <button class="btn sm gh" data-act="ad" style="flex:1">📺 +150🟡</button>
+        </div>
+        <h3>🔩 Body slots — click to tune</h3>
+        <div class="slotgrid" id="slotgrid"></div>
+        <div id="slot-detail"></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="screen" id="scr-race"><div class="racewrap">
+    <div id="stage">
+      <canvas id="cv" width="480" height="300"></canvas>
+      <div class="hud" id="hud-pos">P–</div>
+      <div class="hud" id="minimap"><span class="fin">🏁</span></div>
+      <div class="hud" id="hud-right"><b id="hud-speed">0</b> km/h<br><span id="hud-time">0.00s</span><br><span id="hud-path">PATH 100%</span></div>
+      <div id="ticker"></div>
+      <div id="countdown"></div>
+      <div class="overlay" id="ov-results"><div class="obox mag">
+        <h2>🏆 Race Results</h2><div id="res-table"></div>
+        <div class="reslegend">path = meters actually run · weaving makes the road longer than 100m</div>
+        <div class="rewardline" id="res-rewards"></div>
+        <div id="res-parts" style="text-align:center"></div>
+        <div id="res-bets" style="margin-top:8px"></div>
+        <div class="cosrow" style="justify-content:center;margin-top:14px">
+          <button class="btn ac" data-act="rematch">🔁 Rematch</button>
+          <button class="btn cy" data-act="res-garage">🔧 Garage</button>
+          <button class="btn gh" data-act="res-hub">🏠 Hub</button>
+        </div>
+      </div></div>
+      <div class="overlay" id="ov-pause"><div class="obox">
+        <h2>⏸ Paused</h2>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+          <button class="btn ac big" data-act="resume">▶ Resume</button>
+          <button class="btn cy big" data-act="restart">🔁 Restart race</button>
+          <button class="btn rd big" data-act="quit">🚪 Quit (bets forfeited)</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="racectrl">
+      <button class="btn sm gh" data-act="race-speed" id="btn-speed">⏩ Speed ×1</button>
+      <button class="btn sm gh" data-act="race-pause">⏸ Pause</button>
+      <button class="btn sm gh" data-act="restart">🔁 Restart</button>
+      <button class="btn sm gh" data-act="quit">🚪 Exit</button>
+    </div>
+  </div></div>
+
+  <div class="screen" id="scr-shop"><div class="wrap">
+    <h2>🛒 The Chop Shop</h2>
+    <div class="statnote">Each card shows the exact stat change <b>compared to the part currently installed</b> in that slot.</div>
+    <div class="shoptabs">
+      <button class="shoptab sel" data-act="shop-tab" data-tab="parts">🔩 Parts</button>
+      <button class="shoptab" data-act="shop-tab" data-tab="boost">💉 Boosters</button>
+      <button class="shoptab" data-act="shop-tab" data-tab="black">☠️ Black Market</button>
+      <button class="shoptab" data-act="shop-tab" data-tab="crystal">💎 Crystals</button>
+    </div>
+    <div class="shopfilters" id="shop-filters">
+      <select id="f-slot"><option value="">All slots</option></select>
+      <select id="f-tier"><option value="">All tiers</option><option value="0">Common</option><option value="1">Rare</option><option value="2">Epic</option><option value="3">Legend</option><option value="4">Mythic</option></select>
+    </div>
+    <div class="shopgrid" id="shopgrid"></div>
+  </div></div>
+
+  <div class="screen" id="scr-bets"><div class="wrap">
+    <h2>💰 Necro Totalizator</h2>
+    <div style="font-size:11px;color:var(--mut);margin:6px 0 10px">Next race lineup — odds are simulated live from ghost-races of these exact runners.</div>
+    <div class="lineup" id="lineup"></div>
+    <div class="betsgrid">
+      <div id="markets"></div>
+      <div class="panel slip">
+        <h3>🎟 Bet slip</h3>
+        <div id="slip-sel" style="font-size:12px;color:var(--mut)">Pick a market outcome…</div>
+        <div class="curseg"><button data-act="bet-cur" data-cur="gold" class="sel" id="cur-g">🟡 Gold</button><button data-act="bet-cur" data-cur="crystal" class="c" id="cur-c">💎 Crystals</button></div>
+        <input type="number" id="slip-stake" min="10" value="100" style="width:100%">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin:8px 0"><span style="color:var(--mut)">Potential payout</span><b id="slip-payout" style="color:var(--acid);font-family:var(--disp)">—</b></div>
+        <button class="btn big am" data-act="bet-place">Place bet</button>
+        <h3 style="margin-top:16px">📋 Active bets</h3>
+        <div id="active-bets" style="font-size:11px;color:var(--mut)">No active bets.</div>
+        <div class="betsmeta">Odds simulated ×<b id="mc-n">160</b> · track fee <b>7%</b> baked into odds.<br>🏦 Owner ledger (commission earned): <b id="ledger">0</b> 🟡<br><button class="btn sm gh" data-act="newlineup" style="margin-top:8px">🎲 New opponents (refunds bets)</button></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal" id="mdl-help"><div class="mbox wide mag"><button class="xbtn" data-act="close-modal">✕</button>
+  <h2 id="help-title">📖 Player Guide</h2>
+  <div class="helptabs"><button data-act="help-lang" data-l="ru" id="hl-ru">РУССКИЙ</button><button data-act="help-lang" data-l="en" id="hl-en">ENGLISH</button></div>
+  <div id="help-body"></div>
+</div></div>
+
+<div class="modal" id="mdl-daily"><div class="mbox mag"><button class="xbtn" data-act="close-modal">✕</button>
+  <h2>🎁 Daily Reward</h2><div style="text-align:center;font-size:12px;color:var(--mut)">Streak: <b id="streak-n" style="color:var(--acid)">0</b> days — keep it alive!</div>
+  <div class="dayrow" id="dayrow"></div>
+  <button class="btn big ac" data-act="daily-claim" id="btn-claim">Claim today</button>
+</div></div>
+
+<div class="modal" id="mdl-ad"><div class="mbox"><button class="xbtn" data-act="close-modal">✕</button>
+  <h2>📺 Rewarded Ad</h2>
+  <div id="ad-stage"><span class="testbadge">DEMO AD</span><span class="adz">🧟</span><span class="adslogan">NECRO-COLA · TASTE THE AFTERLIFE</span><span style="font-size:11px;color:var(--mut)">Reward in <b id="ad-timer" style="color:var(--amber)">5</b>s</span></div>
+  <button class="btn big am" data-act="ad-collect" id="btn-ad-collect" disabled>Collect +150 🟡</button>
+  <div style="font-size:10px;color:var(--mut);text-align:center;margin-top:8px" id="ad-left"></div>
+</div></div>
+
+<div class="modal" id="mdl-checkout"><div class="mbox"><button class="xbtn" data-act="close-modal">✕</button>
+  <h2>💎 Crystal Checkout</h2>
+  <div style="position:relative;background:var(--bg1);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center">
+    <span class="testbadge" id="co-badge">TEST MODE</span>
+    <div style="font-size:38px;margin:6px">💎</div>
+    <div class="disp" id="co-amount" style="font-size:20px;color:var(--cyan)">100</div>
+    <div style="color:var(--mut);font-size:12px;margin-top:4px">via Telegram Stars · <b id="co-price" style="color:var(--amber)">99★</b></div>
+  </div>
+  <button class="btn big cy" data-act="checkout-real" id="co-real" style="margin-top:14px;display:none">⭐ Pay</button>
+  <button class="btn big gh" data-act="checkout-pay" id="co-test" style="margin-top:14px">🧪 Test grant (free)</button>
+  <div style="font-size:10px;color:var(--mut);text-align:center;margin-top:8px" id="co-note"></div>
+</div></div>
+
+<div class="modal" id="mdl-settings"><div class="mbox"><button class="xbtn" data-act="close-modal">✕</button>
+  <h2>⚙️ Settings & Career</h2>
+  <div class="setrow"><span>🔊 All sound</span><button class="btn sm gh" data-act="mute" id="set-sound">ON</button></div>
+  <div class="setrow"><span>🎵 Music</span><button class="btn sm gh" data-act="toggle-music" id="set-music">ON</button></div>
+  <div class="setrow"><span>📳 Screen shake</span><button class="btn sm gh" data-act="toggle-shake" id="set-shake">ON</button></div>
+  <div class="setrow"><span>🤖 Bot skill</span><select id="set-diff"><option value="0">Casual</option><option value="1" selected>Pro</option><option value="2">Nightmare</option></select></div>
+  <div class="setrow"><span>📖 Guide language</span><button class="btn sm gh" data-act="help">❓ Open guide</button></div>
+  <h3 style="margin-top:14px">📈 Career</h3><div class="career" id="career"></div>
+  <div class="cosrow" style="margin-top:14px">
+    <button class="btn sm cy" data-act="save-export">💾 Export save</button>
+    <button class="btn sm gh" data-act="save-import">📂 Import save</button>
+    <input type="file" id="file-import" accept=".json" style="display:none">
+    <button class="btn sm rd" data-act="reset-save" id="btn-reset">🗑 Reset save</button>
+  </div>
+</div></div>
+
+<div id="toasts"></div>
+
+<script>
+/* ОБРАЩЕНИЕ К ИИ: см. шапку файла. Секции: 0 helpers · 1 data · 2 save · 3 audio ·
+   4 sprites · 5 sim+weave · 6 odds · 7 race · 8 garage+Δ · 9 shop · 10 bets · 11 help/modals · 12 telegram · 13 boot */
+'use strict';
+/* ---------- 0. HELPERS ---------- */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const rnd=(a=1,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+function mulberry32(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const FONT={A:[2,5,7,5,5],B:[6,5,6,5,6],C:[3,4,4,4,3],D:[6,5,5,5,6],E:[7,4,6,4,7],F:[7,4,6,4,4],G:[3,4,5,5,3],H:[5,5,7,5,5],I:[7,2,2,2,7],J:[1,1,1,5,2],K:[5,5,6,5,5],L:[4,4,4,4,7],M:[5,7,7,5,5],N:[6,5,5,5,5],O:[2,5,5,5,2],P:[6,5,6,4,4],Q:[2,5,5,2,1],R:[6,5,6,5,5],S:[3,4,2,1,6],T:[7,2,2,2,2],U:[5,5,5,5,7],V:[5,5,5,5,2],W:[5,5,7,7,5],X:[5,5,2,5,5],Y:[5,5,2,2,2],Z:[7,1,2,4,7],'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[6,1,2,4,7],'3':[6,1,2,1,6],'4':[5,5,7,1,1],'5':[7,4,6,1,6],'6':[3,4,6,5,2],'7':[7,1,2,2,2],'8':[2,5,2,5,2],'9':[2,5,3,1,6],' ':[0,0,0,0,0],'.':[0,0,0,0,2],'-':[0,0,7,0,0],':':[0,2,0,2,0],'!':[2,2,2,0,2],'/':[1,1,2,4,4],'+':[0,2,7,2,0],"'":[2,2,0,0,0],'%':[5,1,2,4,5]};
+function ptext(c,s,x,y,col,sc=1){c.fillStyle=col;s=(''+s).toUpperCase();let cx=x;for(const ch of s){const g=FONT[ch]||FONT[' '];for(let r=0;r<5;r++)for(let b=0;b<3;b++)if(g[r]&(4>>b))c.fillRect(cx+b*sc,y+r*sc,sc,sc);cx+=4*sc}}
+function mkcv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+/* ---------- 1. DATA ---------- */
+const VIEW_W=480,VIEW_H=300,WORLD_W=1400,START_X=70,RACE_LEN=1200,FINISH_X=START_X+RACE_LEN,CAGE_X=FINISH_X+22;
+const LANES=5,LANE_H=34,TRACK_Y=80,TRACK_H=LANES*LANE_H,WALL_H=10,MAX_LOST=3,HOUSE=0.93,MC_SIMS=160,RACE_CAP=60;
+const SPR_H=22,WEAVE_CLAMP=(LANE_H-SPR_H)/2-0.5;
+const TIERS=['COMMON','RARE','EPIC','LEGEND','MYTHIC'],TCOL=['#9aa3b2','#28e0ff','#ff2bd6','#ffb703','#8dff3a'];
+const SLOTS=['head','torso','armL','armR','thighL','calfL','footL','thighR','calfR','footR','heart','nerves'];
+const SLOTNAME={head:'Head',torso:'Torso',armL:'Arm L',armR:'Arm R',thighL:'Thigh L',calfL:'Calf L',footL:'Foot L',thighR:'Thigh R',calfR:'Calf R',footR:'Foot R',heart:'Heart',nerves:'Nerves'};
+const SLOTDEF={
+ head:{d:[['awareness',[6,9,13,18,24]]]},torso:{d:[['integrity',[8,12,17,23,30]],['stamina',[3,4,6,8,11]]]},
+ armL:{d:[['stability',[3,4.5,6,8,10]],['integrity',[2,3,4,5,7]]]},armR:{d:[['stability',[3,4.5,6,8,10]],['integrity',[2,3,4,5,7]]]},
+ thighL:{d:[['speed',[2.2,3.4,4.8,6.5,8.5]]]},thighR:{d:[['speed',[2.2,3.4,4.8,6.5,8.5]]]},
+ calfL:{d:[['speed',[1.6,2.4,3.4,4.6,6]]]},calfR:{d:[['speed',[1.6,2.4,3.4,4.6,6]]]},
+ footL:{d:[['speed',[0.9,1.4,2,2.8,3.6]]]},footR:{d:[['speed',[0.9,1.4,2,2.8,3.6]]]},
+ heart:{d:[['stamina',[8,12,17,23,30]]]},nerves:{d:[['speed',[1.2,1.8,2.6,3.6,4.8]],['boost',[3,5,8,12,17]]]}};
+const DETACH=['head','armL','armR','thighL','calfL','footL','thighR','calfR','footR'];
+const DW={head:.6,armL:2,armR:2,thighL:1,calfL:2,footL:3,thighR:1,calfR:2,footR:3};
+const kindOf=s=>s==='head'?'head':s.startsWith('arm')?'arm':'leg';
+const PRICE_G=[60,240,900,3200,0],PRICE_C=[0,0,0,90,220];
+const BOTNAMES=['Rotgut Bob','Limping Joe','Mr. Brains','Corpse Sprinter','Uncle Fred','Zom-Clown','Grave Dancer','Sir Rots-a-Lot','Moldy Mike','Deadbeat Dan','Shambler Sam','Crypt Kicker'];
+const LEAGUES=[{n:'BRONZE',i:'🥉',t:0,m:1,c:'#cd7f32'},{n:'SILVER',i:'🥈',t:100,m:1.3,c:'#c0c0c0'},{n:'GOLD',i:'🥇',t:250,m:1.7,c:'#ffd700'},{n:'PLATINUM',i:'💠',t:500,m:2.2,c:'#28e0ff'},{n:'NECRO',i:'☠️',t:900,m:3,c:'#8dff3a'}];
+const BOOSTERS=[{id:'nitro',n:'Nitro Syrup',d:'+15% speed next race',p:180,ic:'⚡'},{id:'adren',n:'Adrenal Gland',d:'+30 stamina next race',p:150,ic:'💪'},{id:'brain',n:'Brain Juice',d:'+25 awareness next race',p:150,ic:'🧠'}];
+const MUTS=[{id:'vamp',n:'Vampire Blood',d:'+18% speed · −15 awareness',p:60,ic:'🩸',fx:{speedMul:1.18,awareness:-15}},{id:'rad',n:'Chernobyl Dust',d:'+25% speed · −20 integrity',p:90,ic:'☢️',fx:{speedMul:1.25,integrity:-20}},{id:'curse',n:'Cursed Amulet',d:'+35% speed · −25 stamina · parts fall ×1.5',p:150,ic:'🔮',fx:{speedMul:1.35,stamina:-25,accMul:1.5}}];
+const PACKS=[{c:100,p:99,k:'p100'},{c:550,p:399,k:'p550'},{c:1400,p:899,k:'p1400'}];
+const DAILY=[{g:100,c:10},{g:150,c:15},{g:200,c:20},{g:250,c:25},{g:300,c:30},{g:400,c:40},{g:600,c:60}];
+const HINTS=[
+ '<b>Welcome to the Morgue.</b> Your zombie is missing a LEFT FOOT — open the Foot L slot and install the spare. Watch the stat bars jump with green numbers.',
+ '<b>Every change is visible.</b> In the garage and shop, green/red chips show exactly what a part will add or remove BEFORE you commit. Press ❓ for the full guide (Russian available).',
+ '<b>Watch the weave.</b> In Run pose the preview sways — that is your Stability. On track, neon trails show each zombie\'s real path: weaving makes the road longer and the finish slower. Better arms = straighter line.',
+ '<b>Bets pay the bills.</b> Open 💰 BETS — you can even bet on how many extra meters your zombie will run. Lost limbs return broken; repair or 💎 instant-fix, then upgrade.'];
+const STATMETA=[
+ {k:'speed',ic:'🏃',n:'Speed',max:45,col:'var(--acid)',fmt:v=>v.toFixed(1),unit:' km/h',
+  en:'Top running speed on the track. Comes mostly from legs and nerves.',ru:'Максимальная скорость бега. Дают ноги и нервы.'},
+ {k:'stamina',ic:'💪',n:'Stamina',max:150,col:'var(--cyan)',fmt:v=>Math.round(v),unit:'%',
+  en:'After 60m zombies fade. High stamina keeps speed to the finish. Heart & torso.',ru:'После 60 м зомби выдыхается. Выносливость держит скорость до финиша. Сердце и торс.'},
+ {k:'awareness',ic:'🧠',n:'Awareness',max:150,col:'var(--mag)',fmt:v=>Math.round(v),unit:'%',
+  en:'Dodges accidents — fewer body parts fall off. From the head.',ru:'Уворачивается от неприятностей — меньше частей отваливается. Даёт голова.'},
+ {k:'integrity',ic:'🛡️',n:'Integrity',max:160,col:'var(--amber)',fmt:v=>Math.round(v),unit:'%',
+  en:'Body toughness — also reduces accidents. Torso & arms.',ru:'Прочность тела — тоже снижает шанс поломки. Торс и руки.'},
+ {k:'stability',ic:'⚖️',n:'Stability',max:80,col:'var(--bone)',fmt:v=>Math.round(v),unit:'',
+  en:'Controls the weave inside the lane. Weaving eats speed and LENGTHENS the actual path — a stable zombie runs a shorter road and finishes sooner. Arms.',
+  ru:'Управляет вилянием по дорожке. Виляние съедает скорость и УДЛИНЯЕТ реальный путь — стабильный зомби бежит более короткую дорогу и финиширует раньше. Дают руки.'},
+ {k:'boost',ic:'🚀',n:'Launch',max:25,col:'var(--blood)',fmt:v=>Math.round(v*100),unit:'%',
+  en:'Explosive burst in the first 1.5 seconds. Nerves.',ru:'Взрывной рывок в первые 1.5 секунды. Нервы.'}];
+/* ---------- 2. SAVE / STATE ---------- */
+const SAVE_KEY='zomdash_v2';
+let uidN=1;const uid=()=>'p'+(uidN++)+'_'+Date.now().toString(36);
+function defSave(){const inst={};for(const s of SLOTS)inst[s]={uid:uid(),slot:s,tier:0,lvl:1,dur:ri(78,95)};delete inst.footL;
+ return{v:2,name:'',zname:'BOBBY',helpLang:'ru',cos:{skin:'#6a9c59',shirt:'#4a3b6b',pants:'#2f2a45',aura:0,decal:''},
+ installed:inst,inventory:[{uid:uid(),slot:'footL',tier:0,lvl:1,dur:100}],
+ gold:1500,crystals:60,xp:0,trophies:0,streak:0,lastDaily:'',adsDate:'',adsUsed:0,
+ boosters:{nitro:0,adren:0,brain:0},armed:{nitro:false,adren:false,brain:false},muts:[],mutsOn:[],
+ bets:[],ledger:0,hint:0,set:{sound:true,music:true,shake:true,diff:1},
+ career:{races:0,wins:0,parts:0,wagered:0,won:0}}}
+let S;try{S=JSON.parse(localStorage.getItem(SAVE_KEY))||defSave();if(S.v!==2)S=defSave()}catch(e){S=defSave()}
+if(!S.helpLang)S.helpLang='ru';
+let canStore=true;
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){if(canStore){canStore=false;toast('⚠️ Storage blocked — progress lives only this session','bad')}}}
+const APP={screen:'title',lineup:null,odds:null,oddsKey:'',sel:null,betCur:'gold',shopTab:'parts',paused:false,speed:1,selSlot:'footL',checkout:null,adTimer:null,resetArm:false,armedSnapshot:null};
+const league=()=>{let l=0;for(let i=0;i<LEAGUES.length;i++)if(S.trophies>=LEAGUES[i].t)l=i;return l};
+const level=()=>1+Math.floor(S.xp/250);
+/* ---------- 3. AUDIO ---------- */
+const AU={ctx:null,master:null,musicGain:null,crowd:null,crowdGain:null,step:0,next:0,pat:'menu'};
+function initAudio(){if(AU.ctx)return;try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.gain.value=S.set.sound?0.6:0;AU.master.connect(AU.ctx.destination);AU.musicGain=AU.ctx.createGain();AU.musicGain.gain.value=S.set.music?1:0;AU.musicGain.connect(AU.master);AU.next=AU.ctx.currentTime+0.1;setInterval(musicTick,60)}catch(e){}}
+function setMute(){if(AU.master)AU.master.gain.value=S.set.sound?0.6:0;$('btn-mute').textContent=S.set.sound?'🔊':'🔇';$('btn-mute').classList.toggle('off',!S.set.sound);$('set-sound').textContent=S.set.sound?'ON':'OFF'}
+function tone(f,d,type='sine',v=0.15,slide=0,when=0){if(!AU.ctx)return;const t=AU.ctx.currentTime+when,o=AU.ctx.createOscillator(),g=AU.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(g);g.connect(AU.master);o.start(t);o.stop(t+d+0.02)}
+function noise(d,v=0.2,fc=1000,type='lowpass',when=0){if(!AU.ctx)return;const t=AU.ctx.currentTime+when,len=Math.max(1,AU.ctx.sampleRate*d|0),b=AU.ctx.createBuffer(1,len,AU.ctx.sampleRate),ch=b.getChannelData(0);for(let i=0;i<len;i++)ch[i]=Math.random()*2-1;const src=AU.ctx.createBufferSource();src.buffer=b;const f=AU.ctx.createBiquadFilter();f.type=type;f.frequency.value=fc;const g=AU.ctx.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);src.connect(f);f.connect(g);g.connect(AU.master);src.start(t)}
+const SFX={click:()=>tone(1200,.05,'square',.05),beep:()=>tone(660,.14,'square',.12),go:()=>{tone(990,.3,'square',.14);noise(.25,.5,900);tone(120,.25,'sine',.4,-80)},
+ crack:()=>{noise(.08,.35,2500,'highpass');tone(300,.12,'sawtooth',.12,-200)},splat:()=>noise(.15,.2,400),
+ slam:()=>{tone(75,.5,'sine',.5,-40);tone(210,.4,'square',.12,-120);noise(.4,.4,600);noise(.6,.15,3000,'highpass',.05)},
+ coin:()=>{tone(880,.08,'sine',.12);tone(1320,.12,'sine',.12,0,.07)},
+ win:()=>{[523,659,784,1046].forEach((f,i)=>tone(f,.18,'triangle',.14,0,i*.09))},
+ lose:()=>{tone(330,.25,'triangle',.12,-60);tone(220,.35,'triangle',.12,-40,.18)},
+ up:()=>{tone(440,.1,'square',.1);tone(660,.12,'square',.1,0,.08);tone(880,.16,'square',.1,0,.16)},
+ fail:()=>{tone(200,.3,'sawtooth',.14,-120);noise(.2,.2,800)}};
+const MPAT={menu:{bpm:82,bass:[45,0,48,0,43,0,41,0],arp:[69,72,76,79,76,72],lead:0},race:{bpm:140,bass:[33,33,45,33,36,33,43,33],arp:[69,0,72,0,76,0,72,79],lead:1}};
+function musicTick(){if(!AU.ctx||!S.set.music||!S.set.sound)return;const p=MPAT[AU.pat],spb=60/p.bpm/2;while(AU.next<AU.ctx.currentTime+0.15){const st=AU.step%8,t=Math.max(0,AU.next-AU.ctx.currentTime);
+ const b=p.bass[st];if(b){const o=AU.ctx.createOscillator(),g=AU.ctx.createGain(),f=AU.ctx.createBiquadFilter();o.type=AU.pat==='race'?'square':'triangle';o.frequency.value=440*Math.pow(2,(b-69)/12);f.type='lowpass';f.frequency.value=AU.pat==='race'?700:400;g.gain.setValueAtTime(AU.pat==='race'?.09:.07,AU.ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,AU.ctx.currentTime+t+spb*.9);o.connect(f);f.connect(g);g.connect(AU.musicGain);o.start(AU.ctx.currentTime+t);o.stop(AU.ctx.currentTime+t+spb)}
+ const a=p.arp[AU.step%p.arp.length];if(a&&AU.step%2===0)tone(440*Math.pow(2,(a-69)/12),spb*1.6,'sine',.035,0,t);
+ if(p.lead&&AU.step%4===2)noise(.03,.04,6000,'highpass',t);
+ AU.next+=spb;AU.step++}}
+function crowdStart(){if(!AU.ctx||AU.crowd)return;const len=AU.ctx.sampleRate*2,b=AU.ctx.createBuffer(1,len,AU.ctx.sampleRate),ch=b.getChannelData(0);for(let i=0;i<len;i++)ch[i]=Math.random()*2-1;const src=AU.ctx.createBufferSource();src.buffer=b;src.loop=true;const f=AU.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=.6;const g=AU.ctx.createGain();g.gain.value=.045;const lfo=AU.ctx.createOscillator(),lg=AU.ctx.createGain();lfo.frequency.value=.35;lg.gain.value=.02;lfo.connect(lg);lg.connect(g.gain);src.connect(f);f.connect(g);g.connect(AU.master);src.start();lfo.start();AU.crowd={src,lfo};AU.crowdGain=g}
+function crowdStop(){if(AU.crowd){try{AU.crowd.src.stop();AU.crowd.lfo.stop()}catch(e){}AU.crowd=null}}
+function crowdSwell(v=.14){if(AU.crowdGain){const t=AU.ctx.currentTime;AU.crowdGain.gain.cancelScheduledValues(t);AU.crowdGain.gain.setValueAtTime(v,t);AU.crowdGain.gain.linearRampToValueAtTime(.045,t+1.6)}}
+/* ---------- 4. SPRITES ---------- */
+const partCache=new Map();
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;r=clamp(Math.round(r*f),0,255);g=clamp(Math.round(g*f),0,255);b=clamp(Math.round(b*f),0,255);return`rgb(${r},${g},${b})`}
+function partSprite(slot,tier,cos){const key=slot+tier+cos.skin+cos.shirt+cos.pants+cos.decal;if(partCache.has(key))return partCache.get(key);
+ const sz={head:[8,7],torso:[10,7],armL:[3,7],armR:[3,7],thighL:[4,3],thighR:[4,3],calfL:[3,3],calfR:[3,3],footL:[5,2],footR:[5,2]}[slot]||[4,4];
+ const cv=mkcv(sz[0],sz[1]),c=cv.getContext('2d'),skin=cos.skin,shirt=cos.shirt,pants=cos.pants;
+ const flesh=tier===3?'#3b4252':tier===4?'#20301c':skin;const edge=tier>=3?TCOL[tier]:shade(flesh,.55);
+ function fill(x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h)}
+ if(slot==='head'){fill(1,0,6,7,flesh);fill(0,1,8,5,flesh);fill(1,0,6,1,shade(flesh,.7));fill(5,2,2,2,tier>=3?TCOL[tier]:'#ffd23f');fill(5,2,1,1,'#111');fill(1,5,2,1,'#8d0801');fill(6,5,1,1,'#3a1');if(tier===1){fill(2,1,1,4,'#333');fill(1,3,3,1,'#333')}if(tier===2){fill(0,0,8,2,'#8892a0');fill(1,0,1,1,'#ccc')}if(tier>=3){fill(0,0,8,1,edge);fill(7,1,1,5,edge)}}
+ else if(slot==='torso'){fill(0,0,10,7,shirt);fill(0,0,10,1,shade(shirt,1.3));fill(0,6,10,1,shade(shirt,.6));fill(8,1,2,5,shade(shirt,.8));if(tier===1){fill(3,1,1,5,'#2b2b2b');fill(2,3,3,1,'#2b2b2b')}if(tier===2){fill(1,1,8,3,'#8892a0');fill(2,2,1,1,'#ddd');fill(7,2,1,1,'#ddd')}if(tier>=3){fill(0,0,10,1,edge);fill(0,6,10,1,edge);fill(4,2,2,2,TCOL[tier])}if(cos.decal)ptext(c,cos.decal,2,2,tier>=2?'#111':'#f2ead8',1)}
+ else if(slot.startsWith('arm')){fill(0,0,3,5,tier>=2?'#8892a0':shirt);fill(0,5,3,2,flesh);if(tier>=3)fill(0,0,1,7,edge);if(tier===4)fill(2,0,1,7,edge)}
+ else if(slot.startsWith('thigh')){fill(0,0,4,3,tier>=2?'#8892a0':pants);if(tier>=3)fill(0,0,4,1,edge)}
+ else if(slot.startsWith('calf')){fill(0,0,3,3,tier>=2?'#6b7482':shade(pants,1.15));if(tier>=3)fill(2,0,1,3,edge)}
+ else if(slot.startsWith('foot')){fill(0,0,4,2,tier>=2?'#454c59':'#2b2135');fill(4,1,1,1,shade(flesh,.8));if(tier>=3)fill(0,0,5,1,edge);if(tier===4)fill(0,1,5,1,edge)}
+ partCache.set(key,cv);return cv}
+function drawZombie(c,x,y,r,frame,opts={}){const cos=r.cos,parts=r.partsLive||r.parts,sc=opts.scale||1;
+ const bob=[0,-1,0,-1][frame],legA=[[-1,2],[0,0],[2,-1],[0,0]][frame],armA=[1,-1,-1,1][frame];
+ const P=(s,px,py)=>{const sp=partSprite(s,parts[s]?parts[s].tier:0,cos);c.drawImage(sp,x+px*sc,y+py*sc,sp.width*sc,sp.height*sc)};
+ if(opts.crawl){if(parts.torso){const t=partSprite('torso',parts.torso.tier,cos);c.drawImage(t,x+2*sc,y+15*sc,12*sc,5*sc)}
+  if(parts.head)P('head',11,12+((frame%2)?0:1));if(parts.armR)P('armR',13,17+(frame%2));if(parts.armL)P('armL',10,18-((frame%2)?1:0));
+  if(parts.thighL)P('thighL',0,17);if(parts.thighR)P('thighR',1,18);return}
+ if(parts.thighL){P('thighL',4+legA[0],14+bob);if(parts.calfL){P('calfL',4+legA[0],17+bob);if(parts.footL)P('footL',3+legA[0],20+bob)}}
+ if(parts.thighR){P('thighR',8+legA[1],14+bob);if(parts.calfR){P('calfR',9+legA[1],17+bob);if(parts.footR)P('footR',8+legA[1],20+bob)}}
+ if(parts.torso)P('torso',3,7+bob);
+ if(parts.armL)P('armL',1+armA,8+bob);
+ if(parts.head)P('head',4,0+bob);else{c.fillStyle='#8d0801';c.fillRect(x+6*sc,y+5+bob*sc,4*sc,2*sc)}
+ if(parts.armR)P('armR',12-armA+(opts.press?2:0),8+bob+(opts.press?-1:0));
+ if(parts.heart&&parts.heart.tier>=3){c.fillStyle=frame%2?'#ff2bd6':'#e5383b';c.fillRect(x+7*sc,y+(9+bob)*sc,2*sc,2*sc)}
+ if(parts.nerves&&parts.nerves.tier>=3){c.fillStyle='#28e0ff';c.fillRect(x+7*sc,y+(7+bob)*sc,1*sc,7*sc)}}
+function zombieRig(cos,parts){return{cos,partsLive:parts}}
+function humanSprite(kind,frame,seed){const key='h'+kind+frame+seed;if(partCache.has(key))return partCache.get(key);
+ const cv=mkcv(10,14),c=cv.getContext('2d');const skins=['#e8b88a','#c98d5f','#8a5a3b','#f0c9a0'];const skin=skins[seed%4];
+ const shirt=['#e5383b','#28e0ff','#ffb703','#3dff7c','#ff2bd6','#f2ead8'][seed%6];const crouch=kind==='hide';
+ const yo=crouch?5:0;c.fillStyle=skin;c.fillRect(3,yo,4,4);c.fillStyle='#2b2135';c.fillRect(3,yo,4,1);
+ c.fillStyle=shirt;if(kind==='woman'){c.fillRect(2,4+yo,6,4);c.fillRect(1,7+yo,8,2)}else c.fillRect(2,4+yo,6,5);
+ c.fillStyle='#2f2a45';if(!crouch){c.fillRect(3,9,2,4);c.fillRect(6,9,2,4)}else c.fillRect(2,9,7,3);
+ c.fillStyle=skin;if(kind==='taunt'){const w=frame%2;c.fillRect(0,4+yo-w,2,2);c.fillRect(1,6+yo-w,2,2)}else if(kind==='panic'){c.fillRect(1,1+yo,2,3);c.fillRect(7,1+yo,2,3)}else if(kind==='cheer'){const j=frame%2?2:0;c.fillRect(1,2+yo-j,2,3);c.fillRect(7,2+yo-j,2,3)}else{c.fillRect(2,6+yo,2,2)}
+ partCache.set(key,cv);return cv}
+function crowdSprite(seed,frame){const key='c'+seed+frame;if(partCache.has(key))return partCache.get(key);
+ const child=seed%10===0,cv=mkcv(8,child?8:11),c=cv.getContext('2d');
+ const skins=['#e8b88a','#c98d5f','#8a5a3b','#f0c9a0'],shirt=['#e5383b','#28e0ff','#ffb703','#3dff7c','#ff2bd6','#9d8fc0','#f2ead8'][seed%7];
+ const h=child?8:11,hy=h-4;c.fillStyle=skins[seed%4];c.fillRect(2,0,4,4);
+ c.fillStyle=shirt;if(seed%3===0){c.fillRect(1,4,6,3);c.fillRect(0,6,8,h-7)}else{c.fillRect(1,4,6,hy-3);c.fillStyle='#2f2a45';c.fillRect(2,hy+1,2,2);c.fillRect(5,hy+1,2,2)}
+ c.fillStyle=skins[seed%4];if(frame){c.fillRect(0,1,1,3);c.fillRect(7,1,1,3)}else{c.fillRect(0,5,1,3);c.fillRect(7,5,1,3)}
+ partCache.set(key,cv);return cv}
+const W={};
+function buildWorld(seed){const rr=mulberry32(seed);
+ W.track=mkcv(WORLD_W,TRACK_H);let c=W.track.getContext('2d');c.fillStyle='#241b33';c.fillRect(0,0,WORLD_W,TRACK_H);
+ for(let i=0;i<LANES;i++){const y=i*LANE_H;if(i%2){c.fillStyle='rgba(255,255,255,.035)';c.fillRect(0,y,WORLD_W,LANE_H)}
+  c.fillStyle='rgba(242,234,216,.4)';for(let x=0;x<WORLD_W;x+=14)c.fillRect(x,y+LANE_H-1,7,1);
+  c.fillStyle='rgba(242,234,216,.10)';for(let x=0;x<WORLD_W;x+=8)c.fillRect(x,y+LANE_H/2,4,1);
+  ptext(c,''+(i+1),14,y+11,'rgba(242,234,216,.5)',2)}
+ c.fillStyle='rgba(0,0,0,.25)';for(let i=0;i<60;i++)c.fillRect(rr()*WORLD_W,rr()*TRACK_H,rr()*20+4,1);
+ for(const m of[0,25,50,75,100]){const x=START_X+m*12;c.fillStyle=m===100?'#8dff3a':'rgba(242,234,216,.55)';for(let y=0;y<TRACK_H;y+=6)c.fillRect(x,y,2,3);
+  ptext(c,m===0?'START':m===100?'FINISH':m+'M',x+5,4,m===100?'#8dff3a':'#ff2bd6',1);ptext(c,m===0?'START':m===100?'FINISH':m+'M',x+5,TRACK_H-9,m===100?'#8dff3a':'#ff2bd6',1)}
+ c.fillStyle='#f2ead8';for(let y=0;y<TRACK_H;y+=4){c.fillRect(FINISH_X-3,y,3,2);c.fillRect(FINISH_X,y+2,3,2)}
+ W.stains=mkcv(WORLD_W,TRACK_H);
+ W.wallT=wallStrip(rr);W.wallB=wallStrip(rr);
+ W.standT=standStrip(rr,34);W.standB=standStrip(rr,40);
+ W.crowdCells=[];for(let i=0;i<Math.floor(WORLD_W/11);i++){if(rr()<.4)W.crowdCells.push({x:i*11+1,top:true,seed:ri(1,999),ph:rr()*6});if(rr()<.4)W.crowdCells.push({x:i*11+1,top:false,seed:ri(1,999),ph:rr()*6})}
+ W.cage=cageSprite(26,TRACK_H+10,'#8892a0');W.gate=cageSprite(14,TRACK_H+10,'#e5383b');
+ W.humans=[];const kinds=['taunt','panic','hide','taunt','panic','woman'];for(let i=0;i<6;i++)W.humans.push({kind:kinds[i],seed:ri(1,999),cx:CAGE_X+38+(i%3)*22,cy:TRACK_Y+10+Math.floor(i/3)*52,ph:rr()*6});
+}
+function wallStrip(rr){const cv=mkcv(WORLD_W,WALL_H),c=cv.getContext('2d');c.fillStyle='#f2ead8';c.fillRect(0,0,WORLD_W,WALL_H);
+ c.fillStyle='rgba(0,0,0,.08)';c.fillRect(0,WALL_H-2,WORLD_W,2);
+ const tags=['BRAINS','RUN','NOM','ZOM','DIE','66','MORGUE','FRESH'];const cols=['#ff2bd6','#28e0ff','#8dff3a','#ffb703','#7a1fff'];
+ for(let i=0;i<26;i++){const x=rr()*WORLD_W,y=rr()*4;const col=cols[i%5];c.globalAlpha=.5;
+  if(rr()<.55)ptext(c,tags[i%tags.length],x,y,col,1);else{c.fillStyle=col;c.beginPath();c.ellipse(x+8,y+4,10,3,rr(),0,7);c.fill()}c.globalAlpha=1}
+ for(let i=0;i<14;i++){const x=rr()*WORLD_W,y=rr()*5;c.fillStyle='rgba(141,8,1,.55)';c.beginPath();c.arc(x,y,rr()*3+1,0,7);c.fill();
+  for(let d=0;d<3;d++)c.fillRect(x-1+d*2,y+2,1,rr()*4+2);if(rr()<.4){c.fillRect(x-2,y-1,5,3);for(let f=0;f<4;f++)c.fillRect(x-2+f,y-3,1,2)}}
+ return cv}
+function standStrip(rr,h){const cv=mkcv(WORLD_W,h),c=cv.getContext('2d');const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#1d1433');g.addColorStop(1,'#120b22');c.fillStyle=g;c.fillRect(0,0,WORLD_W,h);
+ for(let r=0;r<3;r++){const y=r*(h/3)+1;c.fillStyle='rgba(0,0,0,.3)';c.fillRect(0,y+9,WORLD_W,2);
+  for(let x=2;x<WORLD_W;x+=11){const seed=Math.floor(rr()*999)+r*31;c.drawImage(crowdSprite(seed,0),x,y)}}
+ return cv}
+function cageSprite(w,h,col){const cv=mkcv(w+16,h+14),c=cv.getContext('2d');
+ c.fillStyle='rgba(40,224,255,.05)';c.fillRect(8,10,w,h);
+ c.fillStyle=col;for(let x=8;x<=8+w;x+=5)c.fillRect(x,10,2,h);for(let y=10;y<=10+h;y+=13)c.fillRect(8,y,w,2);
+ c.fillStyle='#ffb703';c.fillRect(4,6,w+8,5);c.fillStyle='#111';for(let x=4;x<4+w+8;x+=8)c.fillRect(x,6,4,5);
+ c.fillStyle=shade(col,.6);c.fillRect(4,10,4,h);c.fillRect(8+w,10,4,h);
+ c.fillStyle=shade(col,1.3);c.beginPath();c.moveTo(8,10);c.lineTo(16,2);c.lineTo(w+16,2);c.lineTo(8+w,10);c.closePath();c.fill();
+ c.strokeStyle=shade(col,.7);c.lineWidth=1;for(let x=12;x<w+12;x+=5){c.beginPath();c.moveTo(x+4,2);c.lineTo(x-2,10);c.stroke()}
+ return cv}
+let SKY=null;
+function buildSky(){SKY={far:mkcv(900,60),mid:mkcv(1100,70)};let c=SKY.far.getContext('2d');const rr=mulberry32(77);
+ for(let x=0;x<900;){const w=ri(24,50),h=ri(18,52);c.fillStyle='#171029';c.fillRect(x,60-h,w,h);
+  for(let wy=60-h+3;wy<56;wy+=5)for(let wx=x+3;wx<x+w-3;wx+=6)if(rr()<.3){c.fillStyle=rr()<.7?'rgba(255,183,3,.5)':'rgba(40,224,255,.5)';c.fillRect(wx,wy,2,2)}x+=w+ri(2,10)}
+ c=SKY.mid.getContext('2d');for(let x=0;x<1100;){const w=ri(30,70),h=ri(14,44);c.fillStyle='#1d1433';c.fillRect(x,70-h,w,h);c.fillStyle='#0d0a18';for(let wx=x+4;wx<x+w-4;wx+=8)c.fillRect(wx,70-h+4,3,5);
+  if(rr()<.3){c.fillStyle='#241740';c.fillRect(x+2,70-h-6,w-4,6)}x+=w+ri(4,16)}}
+/* ---------- 5. STATS / LINEUP / SIM + WEAVE ---------- */
+function durF(d){return .5+.5*d/100}
+function computeStats(parts,muts){const st={speed:8,stamina:40,awareness:30,integrity:50,stability:10,boost:0,dur:0,n:0};
+ for(const s in parts){const p=parts[s];if(!p)continue;st.dur+=p.dur;st.n++;for(const[stat,vals]of SLOTDEF[s].d){let v=vals[p.tier]*(1+.12*(p.lvl-1))*durF(p.dur);if(stat==='boost')v=v/60;st[stat]+=v}}
+ st.dur=st.n?st.dur/st.n:100;st.boost=clamp(st.boost,0,.25);
+ for(const id of muts||[]){const m=MUTS.find(x=>x.id===id);if(!m)continue;if(m.fx.speedMul)st.speed*=m.fx.speedMul;for(const k of['awareness','integrity','stamina'])if(m.fx[k])st[k]+=m.fx[k];st.accMul=m.fx.accMul||st.accMul}
+ st.awareness=clamp(st.awareness,0,150);st.integrity=clamp(st.integrity,0,160);st.stamina=clamp(st.stamina,0,160);return st}
+function weaveParams(st){const sn=clamp((st.stability-10)/55,0,1);return{A:5.5-4.8*sn,W:6.0-3.4*sn}}
+function playerParts(){const p={};for(const s in S.installed)p[s]={...S.installed[s]};return p}
+function curStats(){return computeStats(playerParts(),S.mutsOn)}
+function statsWith(slot,cand){const p=playerParts();if(cand)p[slot]={...cand};else delete p[slot];return computeStats(p,S.mutsOn)}
+function diffStats(a,b){const d={};for(const m of STATMETA){const v=b[m.k]-a[m.k];if(Math.abs(v)>(m.k==='speed'?.04:.4))d[m.k]=v}return d}
+function fmtDelta(k,v){const m=STATMETA.find(x=>x.k===k);const s=v>0?'+':'−';const a=Math.abs(v);
+ return s+(k==='speed'?a.toFixed(1):k==='boost'?Math.round(a*100)+'%':Math.round(a))+' '+m.n}
+function deltaHTML(d,empty){const keys=Object.keys(d);if(!keys.length)return empty?`<span class="dchip zero">${empty}</span>`:'';
+ return keys.map(k=>`<span class="dchip ${d[k]>0?'up':'dn'}">${fmtDelta(k,d[k])}</span>`).join('')}
+function botParts(lg,diff){const p={};for(const s of SLOTS){const roll=Math.random()+lg*.13+diff*.06;const tier=roll>1.15?4:roll>.95?3:roll>.7?2:roll>.4?1:0;p[s]={uid:'b',slot:s,tier,lvl:clamp(1+ri(0,lg),1,5),dur:ri(70,100)}}return p}
+function buildLineup(){const lg=league(),diff=S.set.diff,names=[...BOTNAMES].sort(()=>Math.random()-.5).slice(0,4);
+ const racers=[{id:'you',name:S.zname||'BOBBY',isPlayer:true,cos:{...S.cos},parts:playerParts(),muts:[...S.mutsOn],seed:ri(1,99999)}];
+ for(let i=0;i<4;i++){const parts=botParts(lg,diff);racers.push({id:'bot'+i,name:names[i],isPlayer:false,seed:ri(1,99999),muts:[],parts,
+  cos:{skin:pick(['#6a9c59','#7ba05b','#5d8a6e','#8aa06a','#6f9c8a']),shirt:pick(['#4a3b6b','#6b3b3b','#3b5a6b','#5a6b3b','#333']),pants:pick(['#2f2a45','#3a2f2f','#22303a']),aura:0,decal:pick(['','BC','NF','MO'])}})}
+ racers.sort(()=>Math.random()-.5);racers.forEach((r,i)=>{r.lane=i;r.stats=computeStats(r.parts,r.muts)});
+ APP.lineup={seed:ri(1,1e9),racers};APP.odds=null;APP.oddsKey=''}
+function makeRaceState(lineup,seed,armed){const rr=mulberry32(seed);
+ const rs=lineup.racers.map((r,i)=>{const parts={};for(const s in r.parts)parts[s]={...r.parts[s]};
+  const boost={...r.stats};if(r.isPlayer&&armed){if(armed.nitro)boost.speed*=1.15;if(armed.adren)boost.stamina+=30;if(armed.brain)boost.awareness+=25}
+  const wp=weaveParams(boost);
+  return{id:r.id,name:r.name,isPlayer:r.isPlayer,cos:r.cos,partsLive:parts,muts:r.muts,base:boost,lane:i,
+   x:START_X-20-(i%2)*5,v:0,stumble:0,lost:[],fin:false,ft:0,stopped:false,crawl:false,press:false,dnf:false,
+   ph:rr()*6.28,wf:5+rr()*3,frame:0,yOff:0,wph:rr()*6.28,wA:wp.A,wW:wp.W,dist:0,trail:[],trailT:0}});
+ return{phase:'pre',pre:3.4,t:0,goT:0,gate:0,cage:0,cageT:-1,racers:rs,rnd:rr,first:null,firstLoss:null,totalLost:0,heads:0,settled:false,doneT:0,timedOut:false,seed}}
+function legDead(p,side){return!p['thigh'+side]||!p['calf'+side]}
+function detach(s,r,fx){const pool=DETACH.filter(k=>r.partsLive[k]);if(!pool.length)return;
+ let tot=0;for(const k of pool)tot+=DW[k];let roll=s.rnd()*tot,slot=pool[0];for(const k of pool){roll-=DW[k];if(roll<=0){slot=k;break}}
+ delete r.partsLive[slot];const side=slot.slice(-1);
+ if(slot.startsWith('thigh')){delete r.partsLive['calf'+side];delete r.partsLive['foot'+side]}
+ if(slot.startsWith('calf'))delete r.partsLive['foot'+side];
+ r.lost.push(slot);r.stumble=.6;r.crawl=legDead(r.partsLive,'L')&&legDead(r.partsLive,'R');
+ s.totalLost++;if(slot==='head')s.heads++;
+ if(!s.firstLoss)s.firstLoss={id:r.id,kind:kindOf(slot),slot};
+ const st=computeStats(r.partsLive,r.muts);if(r.isPlayer&&APP.armedSnapshot){if(APP.armedSnapshot.adren)st.stamina+=30;if(APP.armedSnapshot.brain)st.awareness+=25}
+ r.base=st;const wp=weaveParams(st);r.wA=wp.A;r.wW=wp.W;
+ fx.push({t:'detach',r,slot})}
+function stepRace(s,dt,fx){
+ if(s.phase==='pre'){const prev=Math.ceil(s.pre);s.pre-=dt;const cur=Math.ceil(s.pre);if(cur!==prev&&cur>0)fx.push({t:'beep',n:cur});
+  if(s.pre<=0){s.phase='go';s.goT=0;fx.push({t:'go'})}return}
+ if(s.phase==='go'){s.goT+=dt;s.gate=Math.min(1,s.gate+dt/.4);if(s.goT>.45)s.phase='run'}
+ if(s.phase==='go'||s.phase==='run'){if(s.phase==='run')s.t+=dt;
+  for(const r of s.racers){if(r.stopped)continue;
+   const prog=clamp((r.x-START_X)/RACE_LEN,0,1);let v=r.base.speed*3.2;
+   v*=1+r.base.boost*Math.max(0,1-s.t/1.5);
+   if(prog>.6)v*=1-(1-Math.min(1,r.base.stamina/140))*(prog-.6)*1.1;
+   if(r.crawl)v*=.35;if(r.stumble>0){r.stumble-=dt;v*=.45}
+   const wA=r.crawl?r.wA*.4:r.wA,wW=r.crawl?r.wW*.6:r.wW;
+   r.wph+=wW*dt;
+   const vy=wA*wW*Math.cos(r.wph);
+   const vx=Math.sqrt(Math.max(v*v-vy*vy,v*v*.09));
+   const oldY=r.yOff;r.yOff=clamp(wA*Math.sin(r.wph),-WEAVE_CLAMP,WEAVE_CLAMP);
+   const dy=r.yOff-oldY;
+   r.x+=vx*dt;r.dist+=Math.hypot(vx*dt,dy);r.v=vx;
+   r.trailT+=dt;if(r.trailT>=.05){r.trailT=0;r.trail.push([r.x,r.yOff]);if(r.trail.length>30)r.trail.shift()}
+   if(!r.fin&&r.lost.length<MAX_LOST&&prog>.05&&prog<.92){
+    let p=.035*(1-r.base.awareness/220)*(1-r.base.integrity/320)*(1+(100-r.base.dur)/160)*(r.base.accMul||1);
+    if(s.rnd()<p*dt)detach(s,r,fx)}
+   if(!r.fin&&r.x>=FINISH_X){r.fin=true;r.ft=s.t;if(!s.first){s.first=r;s.cageT=0;fx.push({t:'cage'})}fx.push({t:'fin',r})}
+   if(r.fin){const stop=CAGE_X-16-(r.lane%2)*5;if(r.x>=stop){r.x=stop;r.stopped=true;r.press=true;fx.push({t:'press',r})}}}
+  if(s.cageT>=0){s.cageT+=dt;s.cage=Math.min(1,s.cageT/.5)}
+  if(s.t>RACE_CAP&&!s.timedOut){s.timedOut=true;for(const r of s.racers)if(!r.stopped){r.stopped=true;if(!r.fin)r.dnf=true}fx.push({t:'timeout'})}
+  if(s.racers.every(r=>r.stopped)){s.phase='done';s.doneT=0}}
+ else if(s.phase==='done'){s.doneT+=dt;if(s.doneT>1.1&&!s.settled){s.settled=true;fx.push({t:'settle'})}}}
+function outcomes(s){const order=[...s.racers].sort((a,b)=>(a.fin&&b.fin)?a.ft-b.ft:a.fin?-1:b.fin?1:b.x-a.x);
+ const you=s.racers.find(r=>r.isPlayer);const dbl=s.racers.some(r=>legDead(r.partsLive,'L')&&legDead(r.partsLive,'R'));
+ return{order,place:order.indexOf(you),youLost:you.lost.length,youDist:you.dist/12,total:s.totalLost,heads:s.heads,firstKind:s.firstLoss?s.firstLoss.kind:'none',firstId:s.firstLoss?s.firstLoss.id:'none',dbl}}
+/* ---------- 6. ODDS ---------- */
+const MARKETS=[
+ {id:'win',t:'🏆 Race winner',sels:R=>R.racers.map(r=>({id:r.id,l:r.name+(r.isPlayer?' (YOU)':'')}))},
+ {id:'podium',t:'🥉 Your zombie on podium?',sels:()=>[{id:'yes',l:'Top 3 — YES'},{id:'no',l:'Top 3 — NO'}]},
+ {id:'total',t:'🦴 Total parts lost (all zombies)',sels:()=>[{id:'0',l:'0 parts'},{id:'12',l:'1–2 parts'},{id:'34',l:'3–4 parts'},{id:'5',l:'5+ parts'}]},
+ {id:'youlost',t:'🧟 Parts YOUR zombie loses',sels:()=>[{id:'0',l:'Exactly 0'},{id:'1',l:'Exactly 1'},{id:'2',l:'Exactly 2'},{id:'3',l:'Exactly 3'}]},
+ {id:'firstkind',t:'🩸 First body part to fall',sels:()=>[{id:'arm',l:'An ARM'},{id:'leg',l:'A LEG part'},{id:'head',l:'A HEAD'},{id:'none',l:'Nothing falls'}]},
+ {id:'firstid',t:'🎯 Who loses the first part',sels:R=>[...R.racers.map(r=>({id:r.id,l:r.name+(r.isPlayer?' (YOU)':'')})),{id:'none',l:'Nobody'}]},
+ {id:'dbl',t:'🦵 Any zombie loses BOTH legs?',sels:()=>[{id:'yes',l:'YES — full crawl'},{id:'no',l:'NO'}]},
+ {id:'heads',t:'💀 Heads lost in the race',sels:()=>[{id:'0',l:'0 heads'},{id:'1',l:'1 head'},{id:'2',l:'2+ heads'}]},
+ {id:'path',t:'📏 Your zombie\'s actual path',sels:()=>[{id:'lt',l:'Under 103m — clean line'},{id:'mid',l:'103–108m'},{id:'gt',l:'Over 108m — wild weave'}]}];
+function marketHit(m,sel,o){switch(m){
+ case'win':return o.order[0].id===sel;case'podium':return sel==='yes'?o.place<3:o.place>=3;
+ case'total':return sel==='0'?o.total===0:sel==='12'?o.total>=1&&o.total<=2:sel==='34'?o.total>=3&&o.total<=4:o.total>=5;
+ case'youlost':return o.youLost===+sel;case'firstkind':return o.firstKind===sel;case'firstid':return o.firstId===sel;
+ case'dbl':return sel==='yes'?o.dbl:!o.dbl;case'heads':return sel==='0'?o.heads===0:sel==='1'?o.heads===1:o.heads>=2;
+ case'path':return sel==='lt'?o.youDist<103:sel==='mid'?o.youDist>=103&&o.youDist<=108:o.youDist>108}}
+function computeOdds(){const key=JSON.stringify(APP.lineup.racers.map(r=>[r.id,r.stats.speed,r.stats.awareness,r.stats.integrity,r.stats.stamina,r.stats.stability]))+S.set.diff;
+ if(APP.odds&&APP.oddsKey===key)return APP.odds;
+ const counts={};MARKETS.forEach(m=>{counts[m.id]={};m.sels(APP.lineup).forEach(s=>counts[m.id][s.id]=0)});
+ for(let k=0;k<MC_SIMS;k++){const st=makeRaceState(APP.lineup,APP.lineup.seed+k*7919,null);const fx=[];let guard=0;
+  while(!st.settled&&guard++<900)stepRace(st,.1,fx);const o=outcomes(st);
+  MARKETS.forEach(m=>m.sels(APP.lineup).forEach(s=>{if(marketHit(m.id,s.id,o))counts[m.id][s.id]++}))}
+ const odds={};MARKETS.forEach(m=>{odds[m.id]={};m.sels(APP.lineup).forEach(s=>{const p=Math.max(.004,counts[m.id][s.id]/MC_SIMS);odds[m.id][s.id]={o:clamp(Math.round(HOUSE/p*100)/100,1.04,50),p:counts[m.id][s.id]/MC_SIMS}})});
+ APP.odds=odds;APP.oddsKey=key;return odds}
+/* ---------- 7. RACE ---------- */
+const cv=$('cv'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+let cam=0,shake=0,parts=[],limbs=[],ticks=[],lastHud=0,acc=0,lastT=0;
+const R={state:null};
+const laneCol=i=>['#ff2bd6','#28e0ff','#ffb703','#e5383b','#9d8fc0'][i%5];
+function initRace(){APP.armedSnapshot={...S.armed};
+ for(const b of BOOSTERS)if(S.armed[b.id]&&S.boosters[b.id]>0){S.boosters[b.id]--;S.armed[b.id]=false}
+ save();buildWorld(APP.lineup.seed+ri(1,999));R.state=makeRaceState(APP.lineup,ri(1,1e9),APP.armedSnapshot);
+ cam=0;shake=0;parts=[];limbs=[];ticks=[];acc=0;APP.paused=false;
+ $('ticker').innerHTML='';$('ov-results').classList.remove('active');$('ov-pause').classList.remove('active');
+ $('countdown').style.display='flex';$('countdown').className='';$('countdown').textContent='3';
+ const mm=$('minimap');mm.querySelectorAll('.mdot').forEach(d=>d.remove());
+ R.state.racers.forEach(r=>{const d=document.createElement('div');d.className='mdot';d.id='mm-'+r.id;
+  d.style.color=d.style.background=r.isPlayer?'#8dff3a':laneCol(r.lane);mm.appendChild(d)});
+ AU.pat='race';crowdStart();SFX.beep();hap('light')}
+function tick(msg,cls=''){const el=document.createElement('div');el.className='tick '+cls;el.innerHTML=msg;$('ticker').appendChild(el);
+ ticks.push({el,t:performance.now()});if(ticks.length>4){ticks[0].el.remove();ticks.shift()}}
+function spawnLimb(r,slot){const sp=partSprite(slot,0,r.cos);
+ const y=TRACK_Y+r.lane*LANE_H+8;limbs.push({sp,x:r.x+6,y,vx:rnd(-30,10),vy:rnd(-90,-50),rest:false,flip:0,bounces:0});
+ for(let i=0;i<16;i++)parts.push({x:r.x+6,y:y+4,vx:rnd(-50,50),vy:rnd(-110,-20),life:rnd(.4,.9),col:Math.random()<.7?'#8d0801':'#e5383b',sz:ri(1,2)});
+ shake=Math.max(shake,S.set.shake?3:0);SFX.crack();setTimeout(()=>SFX.splat(),90);crowdSwell();hap('warning')}
+function raceFX(fx){for(const e of fx){const s=R.state;
+ if(e.t==='beep'){$('countdown').textContent=e.n;SFX.beep()}
+ else if(e.t==='go'){$('countdown').textContent='GO!';$('countdown').className='go';SFX.go();crowdSwell(.18);setTimeout(()=>{if(APP.screen==='race')$('countdown').style.display='none'},600);tick('🔫 GATE UP — THEY\'RE LOOSE!','good');hap('success')}
+ else if(e.t==='detach'){spawnLimb(e.r,e.slot);const nm=e.r.isPlayer?'<b style="color:#8dff3a">'+e.r.name+'</b>':e.r.name;
+  tick('💥 '+nm+' lost '+SLOTNAME[e.slot].toUpperCase()+'!'+(e.r.crawl?' <b style="color:#e5383b">CRAWLING!</b>':''),'bad');
+  if(!s.firstLossTick){s.firstLossTick=true;tick('🩸 FIRST BLOOD: '+SLOTNAME[e.slot],'info')}}
+ else if(e.t==='cage'){setTimeout(()=>{if(APP.screen==='race'){SFX.slam();shake=S.set.shake?7:0;crowdSwell(.22);hap('heavy');
+  for(let i=0;i<24;i++)parts.push({x:CAGE_X+13,y:TRACK_Y+TRACK_H-2,vx:rnd(-60,60),vy:rnd(-60,-10),life:rnd(.3,.7),col:'#9d8fc0',sz:1})}},500);
+  tick('🔒 SAFETY CAGE DROPPING!','info')}
+ else if(e.t==='fin'){if(e.r.isPlayer){tick('🏁 YOU: '+e.r.ft.toFixed(2)+'s · ran '+(e.r.dist/12).toFixed(1)+'m of road','good');hap('success')}crowdSwell(.12)}
+ else if(e.t==='press'&&e.r.isPlayer)tick('🧟 Pressing the cage… the humans are SAFE. For now.','info');
+ else if(e.t==='timeout')tick('⏱ Time cap — stragglers marked DNF','bad');
+ else if(e.t==='settle')settleRace()}}
+function renderRace(dt){const s=R.state;if(!s)return;const now=performance.now()/1000;
+ const leader=s.racers.reduce((a,b)=>b.x>a.x?b:a);
+ const target=clamp(leader.x-170,0,WORLD_W-VIEW_W);cam+=(target-cam)*Math.min(1,dt*4);
+ shake*=Math.pow(.001,dt);const sx=shake?rnd(-shake,shake):0,sy=shake?rnd(-shake,shake):0;
+ ctx.fillStyle='#0d0a18';ctx.fillRect(0,0,VIEW_W,VIEW_H);
+ const g=ctx.createLinearGradient(0,0,0,36);g.addColorStop(0,'#120b22');g.addColorStop(1,'#241740');ctx.fillStyle=g;ctx.fillRect(0,0,VIEW_W,36);
+ for(let i=0;i<40;i++){const x=(i*97)%VIEW_W,y=(i*53)%30;ctx.fillStyle=`rgba(242,234,216,${.3+.3*Math.sin(now*2+i)})`;ctx.fillRect(x,y,1,1)}
+ ctx.fillStyle='#f2ead8';ctx.beginPath();ctx.arc(392-cam*.05,16,10,0,7);ctx.fill();ctx.fillStyle='#d8cfba';ctx.fillRect(388-cam*.05,12,3,3);ctx.fillRect(395-cam*.05,18,2,2);
+ ctx.drawImage(SKY.far,-cam*.15,-24);ctx.drawImage(SKY.mid,-cam*.4,-34);
+ if(Math.sin(now*7)>-.6){ctx.globalAlpha=.85;ptext(ctx,'ZOMDASH',430-cam*.4,12,'#ff2bd6',2);ctx.globalAlpha=1}
+ ctx.fillStyle='rgba(40,224,255,.04)';ctx.fillRect(((now*8)%600)-120,22,220,10);ctx.fillStyle='rgba(141,255,58,.03)';ctx.fillRect(500-((now*5)%700),28,260,8);
+ ctx.save();ctx.translate(Math.round(-cam+sx),Math.round(sy));
+ ctx.drawImage(W.standT,0,36);ctx.drawImage(W.standB,0,260);
+ const exc=s.phase==='done'?3:1;for(const cell of W.crowdCells){const fr=Math.floor(now*(2+exc)+cell.ph)%2;
+  ctx.drawImage(crowdSprite(cell.seed,fr),cell.x,cell.top?36+((cell.seed%3)*11)+1:260+((cell.seed%3)*13)+1)}
+ ctx.drawImage(W.wallT,0,TRACK_Y-WALL_H);ctx.drawImage(W.track,0,TRACK_Y);ctx.drawImage(W.stains,0,TRACK_Y);
+ for(const l of limbs)if(l.rest)ctx.drawImage(l.sp,Math.round(l.x),Math.round(l.y));
+ const safe=s.cage>=1;for(const h of W.humans){let k=h.kind,fr=Math.floor(now*3+h.ph)%2,hx=h.cx;
+  if(k==='panic'){hx+=Math.sin(now*4+h.ph)*6;if(safe)k='cheer'}else if(k==='taunt'&&safe)k='cheer';else if(k==='hide'&&safe&&Math.floor(now+h.ph)%4===0)k='taunt';
+  if(k==='woman')k=fr?'taunt':'panic';
+  ctx.drawImage(humanSprite(k,fr,h.seed),Math.round(hx),h.cy+(k==='cheer'?-fr*3:0))}
+ ctx.fillStyle='#8892a0';const hcx=CAGE_X+30,hcw=76;for(let x=hcx;x<=hcx+hcw;x+=6)ctx.fillRect(x,TRACK_Y+2,2,TRACK_H-4);
+ ctx.fillRect(hcx,TRACK_Y+2,hcw,3);ctx.fillRect(hcx,TRACK_Y+TRACK_H-5,hcw,3);ctx.fillRect(hcx,TRACK_Y+2,3,TRACK_H-4);ctx.fillRect(hcx+hcw-3,TRACK_Y+2,3,TRACK_H-4);
+ ptext(ctx,'FRESH MEAT',hcx+8,TRACK_Y-9,'#ff2bd6',1);
+ for(const r of s.racers){if(r.trail.length<2)continue;const baseY=TRACK_Y+r.lane*LANE_H+(LANE_H-SPR_H)/2;
+  const col=r.isPlayer?'#8dff3a':laneCol(r.lane);ctx.strokeStyle=col;ctx.lineWidth=1;
+  for(let i=1;i<r.trail.length;i++){ctx.globalAlpha=(i/r.trail.length)*.4;ctx.beginPath();
+   ctx.moveTo(r.trail[i-1][0]+8,baseY+r.trail[i-1][1]+11);ctx.lineTo(r.trail[i][0]+8,baseY+r.trail[i][1]+11);ctx.stroke()}
+  ctx.globalAlpha=1}
+ const sorted=[...s.racers].sort((a,b)=>a.lane-b.lane);
+ for(const r of sorted){const baseY=TRACK_Y+r.lane*LANE_H+(LANE_H-SPR_H)/2;
+  const jit=r.stumble>0?rnd(-.6,.6):0;
+  const y=Math.round(baseY+r.yOff+jit);r.frame=Math.floor(now*(r.crawl?5:10)+r.ph)%4;const x=Math.round(r.x);
+  if(r.isPlayer&&(S.cos.aura==='1'||S.cos.aura===1)){const gl=ctx.createRadialGradient(x+8,y+11,2,x+8,y+11,20);gl.addColorStop(0,'rgba(141,255,58,.25)');gl.addColorStop(1,'transparent');ctx.fillStyle=gl;ctx.fillRect(x-14,y-10,44,44)}
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(x+2,Math.round(baseY+21+r.yOff*.4),12,2);
+  drawZombie(ctx,x,y,r,r.frame,{crawl:r.crawl,press:r.press&&Math.floor(now*6)%2===0});
+  const tag=r.isPlayer?'YOU':r.name.slice(0,11);const tw=tag.length*4+4;
+  ctx.fillStyle='rgba(8,6,15,.8)';ctx.fillRect(x+8-tw/2,y-9,tw,8);
+  ptext(ctx,tag,x+8-tw/2+2,y-7,r.isPlayer?'#8dff3a':'#f2ead8',1)}
+ for(const l of limbs)if(!l.rest){l.vy+=240*dt;l.x+=l.vx*dt;l.y+=l.vy*dt;l.flip+=dt*10;
+  const laneFloor=TRACK_Y+TRACK_H-6;
+  if(l.y>laneFloor){l.y=laneFloor;l.vy*=-.35;l.vx*=.6;l.bounces++;
+   const st=W.stains.getContext('2d');st.fillStyle='rgba(141,8,1,.5)';st.beginPath();st.arc(l.x+2,l.y-TRACK_Y+2,rnd(2,4),0,7);st.fill();
+   if(l.bounces>=2)l.rest=true}
+  ctx.save();ctx.translate(Math.round(l.x),Math.round(l.y));if(Math.floor(l.flip)%2)ctx.scale(-1,1);ctx.drawImage(l.sp,0,0);ctx.restore()}
+ for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){
+  if(p.col==='#8d0801'||p.col==='#e5383b'){const st=W.stains.getContext('2d');st.fillStyle='rgba(141,8,1,.45)';st.fillRect(p.x,p.y-TRACK_Y,p.sz+1,p.sz)}
+  parts.splice(i,1);continue}
+  p.vy+=260*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;ctx.fillStyle=p.col;ctx.fillRect(Math.round(p.x),Math.round(p.y),p.sz,p.sz)}
+ const gateY=TRACK_Y-5-s.gate*(TRACK_H+30);ctx.drawImage(W.gate,START_X-20,gateY);
+ const cageY=TRACK_Y-5-(1-s.cage)*(TRACK_H+40);if(s.cage>0||s.cageT>=0)ctx.drawImage(W.cage,CAGE_X-4,cageY);
+ ctx.drawImage(W.wallB,0,TRACK_Y+TRACK_H);
+ ctx.restore();
+ if(now-lastHud>.12){lastHud=now;const you=s.racers.find(r=>r.isPlayer);
+  const rank=1+s.racers.filter(r=>r!==you&&(r.fin&&you.fin?r.ft<you.ft:r.fin&&!you.fin?true:!r.fin&&r.x>you.x)).length;
+  $('hud-pos').textContent='P'+rank+'/5';$('hud-speed').textContent=Math.round(you.v/3.2);
+  $('hud-time').textContent=(you.fin?you.ft:s.t).toFixed(2)+'s';
+  const fwd=Math.max(1,you.x-START_X);$('hud-path').textContent='PATH '+Math.round(you.dist/fwd*100)+'%';
+  for(const r of s.racers){const d=$('mm-'+r.id);if(d)d.style.left=(4+clamp((r.x-START_X)/RACE_LEN,0,1)*92)+'%'}}
+ for(let i=ticks.length-1;i>=0;i--)if(performance.now()-ticks[i].t>4200){ticks[i].el.remove();ticks.splice(i,1)}}
+function settleRace(){const s=R.state,o=outcomes(s);const lg=league(),mult=LEAGUES[lg].m;
+ const gold=[120,80,50,30,20][o.place]*mult|0,xp=[50,35,25,15,10][o.place],tro=[25,10,0,-10,-20][o.place];
+ S.gold+=gold;S.xp+=xp;S.trophies=Math.max(0,S.trophies+tro);S.career.races++;if(o.place===0)S.career.wins++;S.career.parts+=o.youLost;
+ const you=s.racers.find(r=>r.isPlayer);const lostChips=[];
+ for(const slot of you.lost){const inst=S.installed[slot];if(inst){inst.dur=0;S.inventory.push(inst);delete S.installed[slot]}lostChips.push(SLOTNAME[slot])}
+ for(const sl in S.installed){const p=S.installed[sl];p.dur=clamp(p.dur-ri(3,9),5,100)}
+ let betHtml='',wonSum=0;
+ for(const b of S.bets){const hit=marketHit(b.market,b.sel,o);const pay=hit?Math.floor(b.stake*b.odds):0;
+  if(hit){if(b.cur==='gold')S.gold+=pay;else S.crystals+=pay;wonSum+=pay;S.career.won+=pay}
+  betHtml+=`<div class="betres ${hit?'won':'lost'}">${hit?'✅':'❌'} ${b.label} · ${b.stake}${b.cur==='gold'?'🟡':'💎'} ×${b.odds} → ${hit?'+'+pay:'0'}</div>`}
+ S.ledger+=Math.round(S.bets.reduce((a,b)=>a+(b.cur==='gold'?b.stake:0),0)*.07);S.bets=[];
+ const newLg=league();save();updateTop();
+ $('res-table').innerHTML=o.order.map((r,i)=>`<div class="resrow p${i+1} ${r.isPlayer?'you':''}"><span class="pl">${i+1}</span><span class="nm">${r.name}${r.isPlayer?' (YOU)':''}</span><span class="tm">${r.fin?r.ft.toFixed(2)+'s':'DNF'}</span><span class="pth" title="meters actually run">${(r.dist/12).toFixed(1)}m</span></div>`).join('');
+ $('res-rewards').innerHTML=`<span style="color:var(--amber)">+${gold} 🟡</span><span style="color:var(--cyan)">+${xp} XP</span><span style="color:${tro>=0?'var(--acid)':'var(--blood)'}">${tro>=0?'+':''}${tro} 🏆</span>${newLg>lg?'<span style="color:var(--mag)">⬆ '+LEAGUES[newLg].n+'!</span>':''}`;
+ $('res-parts').innerHTML=lostChips.length?lostChips.map(n=>`<span class="partlost">🦴 ${n} → inventory (broken)</span>`).join(''):'<span style="font-size:11px;color:var(--acid)">✨ No parts lost — clean run!</span>';
+ $('res-bets').innerHTML=betHtml;
+ $('ov-results').classList.add('active');
+ if(o.place===0)SFX.win();else if(o.place<3)SFX.coin();else SFX.lose();
+ if(wonSum>0)toast('💰 Bets paid out +'+fmt(wonSum)+'!','gold');
+ crowdSwell(.2);buildLineup()}
+function quitRace(forfeit){if(forfeit&&S.bets.length){S.ledger+=S.bets.reduce((a,b)=>a+(b.cur==='gold'?b.stake:0),0);S.bets=[];toast('🚪 Bets forfeited — house keeps the stakes','bad');save()}
+ crowdStop();AU.pat='menu';R.state=null;nav('hub')}
+/* ---------- 8. GARAGE + LIVE Δ ---------- */
+const prevCv=$('prev-cv'),pctx=prevCv.getContext('2d');pctx.imageSmoothingEnabled=false;
+let prevPulse=0,prevStats=null,statEls=null,weaveA=5.5,weaveW=6;
+function renderPrev(now){pctx.clearRect(0,0,176,210);
+ const rig=zombieRig(S.cos,playerParts());
+ const anim=$('cos-anim').value;const fr=Math.floor(now*(anim==='run'?10:3))%4;
+ prevPulse=Math.max(0,prevPulse-.016);
+ const auraOn=(S.cos.aura==='1'||S.cos.aura===1);
+ if(auraOn||prevPulse>0){const a=auraOn?.18:0;const gl=pctx.createRadialGradient(88,110,10,88,110,80);
+  gl.addColorStop(0,`rgba(141,255,58,${a+prevPulse*.4})`);gl.addColorStop(1,'transparent');pctx.fillStyle=gl;pctx.fillRect(0,0,176,210)}
+ pctx.fillStyle='rgba(0,0,0,.4)';pctx.fillRect(40,182,96,6);
+ const bob=anim==='idle'?Math.round(Math.sin(now*2)*2):0;
+ const sway=anim==='run'?Math.round(Math.sin(now*weaveW)*weaveA*1.6):0;
+ drawZombie(pctx,32+sway,26+bob,rig,anim==='idle'?0:fr,{crawl:anim==='crawl',scale:7});
+ ptext(pctx,S.zname||'BOBBY',88-((S.zname||'BOBBY').length*4*2)/2,196,'#8dff3a',2)}
+function buildStatRows(){if(statEls)return;statEls={};const box=$('statlist');box.innerHTML='';
+ for(const m of STATMETA){const row=document.createElement('div');row.className='statrow';row.id='sr-'+m.k;
+  row.innerHTML=`<span class="lbl" title="">${m.ic} ${m.n}</span><div class="bar"><i style="width:0%;background:${m.col}"></i></div><span class="val" style="color:${m.col}">0</span>`;
+  box.appendChild(row);statEls[m.k]={row,bar:row.querySelector('.bar i'),val:row.querySelector('.val'),lbl:row.querySelector('.lbl')}}}
+function updateStats(animate){buildStatRows();const st=curStats();const wp=weaveParams(st);weaveA=wp.A;weaveW=wp.W;
+ for(const m of STATMETA){const e=statEls[m.k];const v=st[m.k];
+  e.bar.style.width=clamp(v/m.max*100,2,100)+'%';e.val.textContent=m.fmt(v)+m.unit;
+  e.lbl.title=(S.helpLang==='ru'?m.ru:m.en);
+  if(animate&&prevStats){const d=v-prevStats[m.k];
+   if(Math.abs(d)>(m.k==='speed'?.04:.4)){
+    e.row.classList.remove('fup','fdn');void e.row.offsetWidth;e.row.classList.add(d>0?'fup':'fdn');
+    const b=document.createElement('span');b.className='statdelta '+(d>0?'up':'dn');
+    b.textContent=(d>0?'+':'−')+(m.k==='speed'?Math.abs(d).toFixed(1):m.k==='boost'?Math.round(Math.abs(d)*100)+'%':Math.round(Math.abs(d)));
+    e.row.appendChild(b);setTimeout(()=>{b.remove();e.row.classList.remove('fup','fdn')},1450)}}}
+ prevStats=st;
+ const v=st.speed*3.2,k=(wp.A*wp.W)/v,extra=Math.round(k*k/4*100);
+ $('weave-note').innerHTML=S.helpLang==='ru'
+  ?`🌀 Виляние <b>±${wp.A.toFixed(1)}px</b> · лишний путь <b>≈ +${extra}%</b> · в позе Run превью качается с этой амплитудой. Поставь руки получше — линия станет прямее, а финиш быстрее.`
+  :`🌀 Weave <b>±${wp.A.toFixed(1)}px</b> · extra path <b>≈ +${extra}%</b> · in Run pose the preview sways with this amplitude. Better arms = straighter line, sooner finish.`;
+ const durs=Object.values(S.installed);const avg=durs.length?durs.reduce((a,p)=>a+p.dur,0)/durs.length:0;
+ $('dur-summary').innerHTML=`Avg durability <b style="color:${avg>60?'var(--acid)':avg>30?'var(--amber)':'var(--blood)'}">${Math.round(avg)}%</b> · ${SLOTS.length-durs.length} empty slot(s)`;
+ const armed=BOOSTERS.filter(b=>S.armed[b.id]&&S.boosters[b.id]>0);
+ $('armed-chips').innerHTML=armed.length?armed.map(b=>`<span class="chip armedchip">${b.ic} ${b.n}</span>`).join(' '):'Nothing armed. Buy boosters in the shop (race-only effect).';
+ $('mut-list').innerHTML=S.muts.map(id=>{const m=MUTS.find(x=>x.id===id);const on=S.mutsOn.includes(id);
+  return`<div class="mutrow"><span>${m.ic}</span><span style="flex:1"><b>${m.n}</b><br><span style="color:var(--mut)">${m.d}</span></span><button class="btn sm ${on?'rd':'gh'}" data-act="toggle-mut" data-id="${id}">${on?'ACTIVE':'OFF'}</button></div>`}).join('')}
+function statChange(fn){const before=curStats();fn();const after=curStats();const d=diffStats(before,after);
+ save();renderHub();prevPulse=1;return d}
+function renderSlots(){$('slotgrid').innerHTML=SLOTS.map(s=>{const p=S.installed[s];
+ const tip=p?`${TIERS[p.tier]} +${p.lvl} · dur ${p.dur}%`:'Empty slot — contributes nothing!';
+ return`<button class="slotbtn ${APP.selSlot===s?'sel':''} ${p?'':'empty'}" data-act="slot" data-slot="${s}" title="${tip}">
+  <span class="sn">${SLOTNAME[s]}</span>${p?`<span class="sv tier${p.tier}">${TIERS[p.tier]} +${p.lvl}</span><div class="durbar"><i style="width:${p.dur}%;background:${p.dur>60?'var(--acid)':p.dur>30?'var(--amber)':'var(--blood)'}"></i></div>`:'<span class="sv">EMPTY</span>'}</button>`}).join('')}
+function repairCost(p){return Math.ceil((100-p.dur)*(PRICE_G[p.tier]||300)*.002)+10}
+function renderDetail(){const s=APP.selSlot,p=S.installed[s],base=curStats();let h=`<h3>${SLOTNAME[s]} slot</h3>`;
+ if(p){const rc=repairCost(p);const upG=80*p.lvl*(p.tier+1),upC=8*(p.tier+1),chance=[0,90,80,70,60][p.lvl]||0;
+  h+=`<div class="invitem"><span class="nm tier${p.tier}"><b>${TIERS[p.tier]}</b> +${p.lvl} · dur ${p.dur}%</span></div>`;
+  if(p.dur<100){const d=diffStats(base,statsWith(s,{...p,dur:100}));
+   h+=`<div class="deltaline"><span class="cmplbl">repair →</span>${deltaHTML(d,'no change')}</div>
+   <button class="btn sm am" data-act="repair" data-uid="${p.uid}" style="width:100%;margin:4px 0">🔧 Repair ${rc}🟡</button>`}
+  if(p.lvl<5){const d=diffStats(base,statsWith(s,{...p,lvl:p.lvl+1}));
+   h+=`<div class="deltaline"><span class="cmplbl">upgrade →</span>${deltaHTML(d,'no change')}</div>
+   <div style="display:flex;gap:5px;margin:4px 0"><button class="btn sm cy" data-act="upgrade" data-uid="${p.uid}" style="flex:1">⬆ +${p.lvl+1} · ${upG}🟡 · ${chance}%</button><button class="btn sm am" data-act="upgrade-cr" data-uid="${p.uid}" title="Guaranteed">💎${upC} 100%</button></div>
+   <div style="font-size:9px;color:var(--mut)">Fail = −25% durability. Power has a price.</div>`}}
+ else h+=`<div class="invitem"><span class="nm" style="color:var(--blood)">Nothing installed — 0 stats from this slot!</span></div>`;
+ const inv=S.inventory.filter(i=>i.slot===s);
+ h+=`<h3 style="margin-top:10px">📦 Inventory (${inv.length})</h3>`;
+ h+=inv.length?inv.map(i=>{const d=diffStats(base,statsWith(s,i));
+  return`<div class="invitem"><span class="nm tier${i.tier}"><b>${TIERS[i.tier]}</b> +${i.lvl} · ${i.dur}%${i.dur===0?' <span style="color:var(--blood)">BROKEN</span>':''}</span>
+  ${i.dur===0?`<button class="btn sm am" data-act="repair" data-uid="${i.uid}">🔧 ${repairCost(i)}🟡</button>`:`<button class="btn sm ac" data-act="install" data-uid="${i.uid}">Install</button>`}
+  <div class="deltaline"><span class="cmplbl">if installed →</span>${deltaHTML(d,'no change')}${i.dur===0?'<span class="dchip zero">repair for full effect</span>':''}</div></div>`}).join(''):'<div style="font-size:11px;color:var(--mut)">Empty — visit the 🛒 Chop Shop.</div>';
+ $('slot-detail').innerHTML=h}
+function renderHub(){updateTop();updateStats(true);renderSlots();renderDetail();
+ $('inp-zname').value=S.zname;$('cos-skin').value=S.cos.skin;$('cos-shirt').value=S.cos.shirt;$('cos-pants').value=S.cos.pants;
+ $('cos-aura').value=S.cos.aura?'1':'0';$('cos-decal').value=S.cos.decal;
+ const lg=league();$('hub-league').textContent=LEAGUES[lg].n;$('hub-league').style.color=LEAGUES[lg].c;$('hub-lgicon').textContent=LEAGUES[lg].i;
+ $('hub-level').textContent=level();$('hub-troph').textContent=S.trophies;$('hub-xp').style.width=(S.xp%250)/250*100+'%';
+ if(S.hint<HINTS.length){$('hintbar').style.display='flex';$('hint-text').innerHTML=HINTS[S.hint]}else $('hintbar').style.display='none'}
+function findPart(u){for(const s in S.installed)if(S.installed[s].uid===u)return{p:S.installed[s],where:'inst'};
+ const i=S.inventory.find(x=>x.uid===u);return i?{p:i,where:'inv'}:null}
+/* ---------- 9. SHOP ---------- */
+function thumb(slot,tier){const c=mkcv(56,56),x=c.getContext('2d');x.imageSmoothingEnabled=false;
+ const sp=partSprite(slot,tier,{skin:'#6a9c59',shirt:'#4a3b6b',pants:'#2f2a45',decal:''});
+ const sc=Math.min(5,Math.floor(48/Math.max(sp.width,sp.height)));x.drawImage(sp,28-sp.width*sc/2,28-sp.height*sc/2,sp.width*sc,sp.height*sc);return c}
+function renderShop(){document.querySelectorAll('.shoptab').forEach(b=>b.classList.toggle('sel',b.dataset.tab===APP.shopTab));
+ $('shop-filters').style.display=APP.shopTab==='parts'?'flex':'none';
+ const fs=$('f-slot');if(fs.options.length<=1)SLOTS.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=SLOTNAME[s];fs.appendChild(o)});
+ const grid=$('shopgrid');grid.innerHTML='';const base=curStats();
+ if(APP.shopTab==='parts'){const fS=fs.value,fT=$('f-tier').value;
+  for(const slot of SLOTS){if(fS&&slot!==fS)continue;for(let t=0;t<5;t++){if(fT!==''&&+fT!==t)continue;
+   const card=document.createElement('div');card.className='itemcard';
+   const useCr=t>=3&&PRICE_C[t]>0;const price=useCr?`<span class="price c">${PRICE_C[t]} 💎</span>`:`<span class="price g">${fmt(PRICE_G[t])} 🟡</span>`;
+   const d=diffStats(base,statsWith(slot,{slot,tier:t,lvl:1,dur:100}));
+   card.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><span class="thumb"></span><div><div class="iname">${SLOTNAME[slot]}</div><span class="tchip tier${t}">${TIERS[t]}</span></div></div>
+    <div class="deltaline"><span class="cmplbl">vs installed →</span>${deltaHTML(d,'same as installed')}</div>
+    <div class="idesc">Lvl 1 · dur 100% · install via garage</div>
+    <button class="btn sm ${useCr?'cy':'am'} buy" data-act="buy-part" data-slot="${slot}" data-tier="${t}">${price}</button>`;
+   card.querySelector('.thumb').replaceWith(thumb(slot,t));grid.appendChild(card)}}}
+ else if(APP.shopTab==='boost'){for(const b of BOOSTERS){const card=document.createElement('div');card.className='itemcard';
+  card.innerHTML=`<div style="font-size:34px">${b.ic}</div><div class="iname">${b.n}</div><div class="idesc">${b.d} · one race only</div>
+   <div style="font-size:11px">Owned: <b style="color:var(--cyan)">${S.boosters[b.id]}</b></div>
+   <div style="display:flex;gap:5px" class="buy"><button class="btn sm am" data-act="buy-boost" data-id="${b.id}" style="flex:1">${b.p}🟡</button>
+   <button class="btn sm ${S.armed[b.id]?'ac':'gh'}" data-act="arm-boost" data-id="${b.id}">${S.armed[b.id]?'ARMED':'Arm'}</button></div>`;grid.appendChild(card)}}
+ else if(APP.shopTab==='black'){for(const m of MUTS){const owned=S.muts.includes(m.id);const card=document.createElement('div');card.className='itemcard bm';
+  card.innerHTML=`<div style="font-size:34px">${m.ic}</div><div class="iname" style="color:var(--blood)">${m.n}</div><div class="idesc">${m.d}</div>
+   <div class="idesc" style="color:var(--blood2)">Permanent · max 2 active · toggle in garage</div>
+   ${owned?'<button class="btn sm gh buy" disabled>OWNED</button>':`<button class="btn sm rd buy" data-act="buy-mut" data-id="${m.id}"><span class="price c" style="color:#fff">${m.p} 💎</span></button>`}`;grid.appendChild(card)}}
+ else{for(const p of PACKS){const card=document.createElement('div');card.className='itemcard';
+  card.innerHTML=`<div style="font-size:34px">💎</div><div class="iname">${fmt(p.c)} Crystals</div><div class="idesc">${p.c>=550?'+'+Math.round(p.c*.1)+'% bonus value · ':''}premium currency</div>
+   <button class="btn sm cy buy" data-act="pack" data-k="${p.k}">⭐ ${p.p} Stars</button>`;grid.appendChild(card)}}}
+/* ---------- 10. BETS ---------- */
+function renderBets(){computeOdds();const L=APP.lineup;
+ $('lineup').innerHTML='';L.racers.forEach(r=>{const d=document.createElement('div');d.className='runner'+(r.isPlayer?' you':'');
+  const c=mkcv(34,44),x=c.getContext('2d');x.imageSmoothingEnabled=false;drawZombie(x,1,0,zombieRig(r.cos,r.parts),0,{scale:2});
+  d.appendChild(c);const info=document.createElement('div');info.innerHTML=`<b>${r.name}</b>${r.isPlayer?' <span style="color:var(--acid)">YOU</span>':''}<div class="rs">SPD ${r.stats.speed.toFixed(1)} · AWR ${Math.round(r.stats.awareness)} · STB ${Math.round(r.stats.stability)}</div>`;d.appendChild(info);$('lineup').appendChild(d)});
+ $('markets').innerHTML=MARKETS.map(m=>`<div class="market" id="mk-${m.id}"><button data-act="market" data-id="${m.id}"><span>${m.t}</span><span style="color:var(--mut)">▾</span></button>
+  <div class="sels">${m.sels(L).map(s=>{const o=APP.odds[m.id][s.id];const sel=APP.sel&&APP.sel.market===m.id&&APP.sel.sel===s.id;
+   return`<button class="selbtn ${sel?'sel':''}" data-act="bet-sel" data-m="${m.id}" data-s="${s.id}" data-l="${m.t.replace(/^[^ ]+ /,'')}: ${s.l}" data-o="${o.o}">
+    <span>${s.l}</span><span class="od">×${o.o.toFixed(2)}</span><span class="pr">${Math.round(o.p*100)}% sim</span></button>`}).join('')}</div></div>`).join('');
+ $('mc-n').textContent=MC_SIMS;$('ledger').textContent=fmt(S.ledger);renderSlip();renderActive()}
+function renderSlip(){if(APP.sel){$('slip-sel').innerHTML=`<b style="color:var(--bone)">${APP.sel.label}</b> <span style="color:var(--amber);font-family:var(--disp)">×${APP.sel.odds.toFixed(2)}</span>`;
+  const st=+$('slip-stake').value||0;$('slip-payout').textContent=fmt(Math.floor(st*APP.sel.odds))+(APP.betCur==='gold'?' 🟡':' 💎')}
+ else{$('slip-sel').textContent='Pick a market outcome…';$('slip-payout').textContent='—'}
+ $('cur-g').classList.toggle('sel',APP.betCur==='gold');$('cur-c').classList.toggle('sel',APP.betCur==='crystal')}
+function renderActive(){$('active-bets').innerHTML=S.bets.length?S.bets.map((b,i)=>`<div class="activebet"><span class="ab-i">${b.label}<br><b style="color:var(--amber)">×${b.odds}</b> · ${b.stake}${b.cur==='gold'?'🟡':'💎'} → ${fmt(Math.floor(b.stake*b.odds))}</span><button class="btn sm gh" data-act="bet-cancel" data-i="${i}">✕</button></div>`).join(''):'No active bets.'}
+/* ---------- 11. HELP / MODALS ---------- */
+const HELP={
+ ru:{title:'📖 Инструкция игрока',secs:[
+  ['🔄 Круговорот игры','<ul><li><b>Гараж</b> — собери зомби из деталей (у Бобби не хватает левой стопы!).</li><li><b>Ставки</b> — поставь золото или кристаллы на исход забега.</li><li><b>Забег</b> — 100 метров, 5 дорожек, части тела отваливаются прямо на трассе.</li><li><b>Финиш</b> — награды, выигрыши, сломанные детали возвращаются в инвентарь.</li><li><b>Ремонт и апгрейд</b> — и по кругу. Каждая деталь меняет цифры.</li></ul>'],
+  ['📊 Что значат характеристики','Полоски слева меняются <span class="g">мгновенно</span> при установке, апгрейде и ремонте — смотри на всплывающие <span class="g">+зелёные</span> и <span class="r">−красные</span> числа. Наведи курсор на название — точный эффект.<div class="statdef">'+STATMETA.map(m=>`<span class="si">${m.ic}</span><span class="sn">${m.n}</span><span class="sd">${m.ru}</span>`).join('')+'</div><div style="margin-top:8px">🌀 <b>Виляние и путь:</b> на трассе за каждым зомби тянется неоновый след — это его реальная траектория. Виляние съедает скорость и удлиняет дорогу: в результатах колонка <b>path</b> показывает, сколько метров он реально пробежал вместо 100. В HUD — <b>PATH %</b>. В гараже (поза Run) превью качается с той же амплитудой, что и на трассе.</div>'],
+  ['🔩 Детали и качество','12 слотов тела. Пустой слот = <span class="r">ноль</span> прибавки. Пять тиров: <span style="color:#9aa3b2">COMMON</span> → <span style="color:#28e0ff">RARE</span> → <span style="color:#ff2bd6">EPIC</span> → <span style="color:#ffb703">LEGEND</span> → <span style="color:#8dff3a">MYTHIC</span>. Уровень детали +1…+5 даёт <b>+12% за уровень</b>. В гараже и магазине заранее видно, что именно изменится. Потерял руку на трассе — виляние усилилось, путь стал длиннее.'],
+  ['🩹 Прочность и ремонт','Каждый забег изнашивает детали на 3–9%. Отвалившаяся деталь возвращается <span class="r">сломанной (0%)</span>. Изношенная деталь даёт меньше половины эффекта. Чини за золото по одной или 💎 мгновенно всё.'],
+  ['⬆ Апгрейды с риском','Шанс успеха: <b>90 / 80 / 70 / 60%</b> по уровням. Провал = <span class="r">−25% прочности</span>. Кристаллы дают 100% гарантию. Перед кнопкой всегда показан будущий прирост.'],
+  ['💉 Бустеры и ☠️ мутации','Бустеры действуют <b>один забег</b>: купи и нажми Arm — сгорят на старте. Мутации постоянные, максимум <b>2 активные</b>, у каждой есть вредный побочный эффект. Переключаются в гараже.'],
+  ['💰 Ставки и комиссия','Коэффициенты считаются из <b>160 призрачных симуляций</b> именно этого состава участников — виляние и путь учитываются автоматически. Чем реже событие — тем жирнее множитель. Есть рынок <b>«actual path»</b>: сколько лишних метров набежит твой зомби. В коэффициент зашита комиссия трека <b>7%</b> — она капает в Owner Ledger. Отмена ставки до старта = полный возврат. Выход из незавершённого забега = ставки сгорают.'],
+  ['💎 Кристаллы и оплата','Кристаллы покупаются за <b>Telegram Stars</b> прямо внутри игры (кнопка ⭐ Pay). Это официальная валюта Telegram для цифровых товаров. Вне Telegram работает бесплатный TEST-режим.'],
+  ['🏁 Управление забегом','<b>Esc</b> — пауза. <b>×2</b> — ускорение. <b>Restart</b> — те же участники, новая судьба. <b>Rematch</b> — новые соперники. Когда первый зомби пересекает финиш, за 0.5 с падает защитная клетка — люди спасены. Максимум <b>3</b> части на зомби за забег. Лимит времени <b>60 с</b> — отставшие получают DNF.'],
+  ['💾 Сохранение','Прогресс живёт в этом браузере. В ⚙️ можно выгрузить сейв в файл и загрузить обратно.']]}
+ ,en:{title:'📖 Player Guide',secs:[
+  ['🔄 The loop','<ul><li><b>Garage</b> — build your zombie from parts (Bobby is missing a left foot!).</li><li><b>Bets</b> — stake gold or crystals on the race.</li><li><b>Race</b> — 100 meters, 5 lanes, body parts fall off on the track.</li><li><b>Finish</b> — rewards, payouts, broken parts return to inventory.</li><li><b>Repair & upgrade</b> — repeat. Every part changes the numbers.</li></ul>'],
+  ['📊 What the stats do','The bars react <span class="g">instantly</span> to installs, upgrades and repairs — watch the floating <span class="g">+green</span> / <span class="r">−red</span> numbers. Hover a stat name for its exact effect.<div class="statdef">'+STATMETA.map(m=>`<span class="si">${m.ic}</span><span class="sn">${m.n}</span><span class="sd">${m.en}</span>`).join('')+'</div><div style="margin-top:8px">🌀 <b>Weave & path:</b> a neon trail behind each zombie is its real trajectory. Weaving eats speed and lengthens the road: the results <b>path</b> column shows meters actually run instead of 100, and the HUD shows <b>PATH %</b>. In the garage (Run pose) the preview sways with the same amplitude as on track.</div>'],
+  ['🔩 Parts & tiers','12 body slots. An empty slot adds <span class="r">zero</span>. Five tiers: <span style="color:#9aa3b2">COMMON</span> → <span style="color:#28e0ff">RARE</span> → <span style="color:#ff2bd6">EPIC</span> → <span style="color:#ffb703">LEGEND</span> → <span style="color:#8dff3a">MYTHIC</span>. Part levels +1…+5 give <b>+12% each</b>. Garage and shop always preview the exact change. Lose an arm on track and the weave grows — the road gets longer.'],
+  ['🩹 Durability & repair','Every race wears parts down 3–9%. A detached part returns <span class="r">broken (0%)</span>. Worn parts give less than half their bonus. Repair one for gold, or 💎 instant-repair everything.'],
+  ['⬆ Risky upgrades','Success chance: <b>90 / 80 / 70 / 60%</b> by level. Failure = <span class="r">−25% durability</span>. Crystals guarantee success. The future gain is always shown next to the button.'],
+  ['💉 Boosters & ☠️ mutations','Boosters last <b>one race</b>: buy, press Arm, they burn at the start. Mutations are permanent, max <b>2 active</b>, each with a harmful side effect. Toggle them in the garage.'],
+  ['💰 Bets & the fee','Odds come from <b>160 ghost simulations</b> of this exact lineup — weave and path length are accounted for automatically. Rarer events pay more. There is an <b>“actual path”</b> market: how many extra meters your zombie will run. A <b>7%</b> track fee is baked into every odd and flows to the Owner Ledger. Cancelling before the start refunds fully. Quitting a live race forfeits bets.'],
+  ['💎 Crystals & payment','Crystals are bought with <b>Telegram Stars</b> inside the game (⭐ Pay button) — Telegram’s official currency for digital goods. Outside Telegram a free TEST mode is available.'],
+  ['🏁 Race controls','<b>Esc</b> pause · <b>×2</b> speed · <b>Restart</b> same runners, new fate · <b>Rematch</b> new opponents. When the first zombie crosses the line, the safety cage drops in 0.5s — the humans survive. Max <b>3</b> parts per zombie per race. Time cap <b>60s</b> — stragglers get DNF.'],
+  ['💾 Saves','Progress lives in this browser. Export/import your save file in ⚙️.']]}};
+function renderHelp(){const L=HELP[S.helpLang]||HELP.ru;$('help-title').textContent=L.title;
+ $('hl-ru').classList.toggle('sel',S.helpLang==='ru');$('hl-en').classList.toggle('sel',S.helpLang==='en');
+ $('help-body').innerHTML=L.secs.map(s=>`<div class="helpsec"><h4>${s[0]}</h4>${s[1]}</div>`).join('')}
+function openModal(id){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active'));$(id).classList.add('active');syncBack()}
+function closeModals(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active'));if(APP.adTimer){clearInterval(APP.adTimer);APP.adTimer=null}syncBack()}
+function renderDaily(){const today=new Date().toDateString();const claimed=S.lastDaily===today;
+ $('streak-n').textContent=S.streak;$('dayrow').innerHTML=DAILY.map((d,i)=>`<div class="day ${i<S.streak?'done':''} ${i===S.streak&&!claimed?'now':''}"><div class="dn">DAY ${i+1}</div><div class="dr" style="color:var(--amber)">${d.g}🟡</div><div class="dr" style="color:var(--cyan)">${d.c}💎</div></div>`).join('');
+ $('btn-claim').disabled=claimed;$('btn-claim').textContent=claimed?'Claimed — come back tomorrow':'Claim today'}
+function renderSettings(){$('set-sound').textContent=S.set.sound?'ON':'OFF';$('set-music').textContent=S.set.music?'ON':'OFF';$('set-shake').textContent=S.set.shake?'ON':'OFF';$('set-diff').value=S.set.diff;
+ $('career').innerHTML=[['Races',S.career.races],['Wins',S.career.wins],['Parts lost',S.career.parts],['Wagered',fmt(S.career.wagered)],['Bet winnings',fmt(S.career.won)],['🏦 Owner fees',fmt(S.ledger)]].map(r=>`<div>${r[0]}<br><b>${r[1]}</b></div>`).join('')}
+function toast(msg,cls=''){const t=document.createElement('div');t.className='toast '+cls;t.innerHTML=msg;$('toasts').appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),320)},3400)}
+function updateTop(){$('tb-name').textContent=S.name||'RACER';$('tb-gold').textContent=fmt(S.gold);$('tb-crystals').textContent=fmt(S.crystals);$('tb-trophies').textContent=fmt(S.trophies);
+ const lg=league();$('tb-league').textContent=LEAGUES[lg].n;$('tb-league').style.color=LEAGUES[lg].c}
+function nav(scr){APP.screen=scr;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+ $('scr-title').classList.remove('active');$('topbar').style.display='flex';
+ if(scr==='hub'){$('scr-hub').classList.add('active');renderHub();AU.pat='menu'}
+ else if(scr==='shop'){$('scr-shop').classList.add('active');renderShop();AU.pat='menu'}
+ else if(scr==='bets'){$('scr-bets').classList.add('active');renderBets();AU.pat='menu'}
+ else if(scr==='race'){$('scr-race').classList.add('active');initRace()}
+ syncBack()}
+/* ---------- 12. TELEGRAM ---------- */
+const TG=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+const IN_TG=!!(TG&&TG.initData);
+const STARS_LINKS={p100:'https://t.me/$w2lgeem4AEifIAAArbEat_-4XtU',p550:'https://t.me/$o6c0aum4AEiiIAAALc1kOSzWO0Y',p1400:'https://t.me/$sIAXr-m4AEikIAAAFMBzY9rURFo'};
+const linkReady=s=>typeof s==='string'&&s.length>10&&!s.startsWith('__');
+function hap(t){try{if(TG&&TG.HapticFeedback){if(t==='success'||t==='error'||t==='warning')TG.HapticFeedback.notificationOccurred(t);else TG.HapticFeedback.impactOccurred(t||'light')}}catch(e){}}
+function syncBack(){try{if(!TG||!TG.BackButton)return;const modal=document.querySelector('.modal.active');
+ if(modal||APP.screen==='race'||APP.screen==='shop'||APP.screen==='bets')TG.BackButton.show();else TG.BackButton.hide()}catch(e){}}
+function tgBack(){const modal=document.querySelector('.modal.active');
+ if(modal){closeModals();return}
+ if(APP.screen==='race'){if($('ov-results').classList.contains('active'))ACT['res-hub']();else ACT['race-pause']();return}
+ if(APP.screen!=='hub'&&APP.screen!=='title')nav('hub')}
+function grantCrystals(c,real){S.crystals+=c;save();updateTop();closeModals();renderShop();SFX.win();hap('success');
+ toast('💎 +'+fmt(c)+' crystals'+(real?' — paid with Stars ⭐':' (TEST MODE)'),'gold');APP.checkout=null}
+/* ---------- 13. ACTIONS ---------- */
+const ACT={
+ enter(){const n=$('inp-player').value.trim();if(!S.name)S.name=n||('RACER'+ri(100,999));save();initAudio();if(AU.ctx&&AU.ctx.state==='suspended')AU.ctx.resume();
+  buildLineup();nav('hub');SFX.click();hap('light');toast('🧟 Welcome to the Morgue, '+S.name+'! Press ❓ for the guide.','acid')},
+ 'nav-hub'(){if(APP.screen==='race')return;nav('hub')},'nav-shop'(){nav('shop')},'nav-bets'(){nav('bets')},
+ 'nav-race'(){if(!APP.lineup)buildLineup();nav('race');SFX.click()},
+ mute(){S.set.sound=!S.set.sound;save();setMute();toast(S.set.sound?'🔊 Sound ON':'🔇 Sound OFF')},
+ settings(){renderSettings();openModal('mdl-settings')},'close-modal'(){closeModals()},
+ help(){renderHelp();openModal('mdl-help')},
+ 'help-lang'(el){S.helpLang=el.dataset.l;save();renderHelp();if(statEls)updateStats(false)},
+ 'toggle-music'(){S.set.music=!S.set.music;save();if(AU.musicGain)AU.musicGain.gain.value=S.set.music?1:0;renderSettings()},
+ 'toggle-shake'(){S.set.shake=!S.set.shake;save();renderSettings()},
+ 'hint-close'(){S.hint++;save();renderHub()},
+ slot(el){APP.selSlot=el.dataset.slot;renderSlots();renderDetail();SFX.click()},
+ install(el){const i=S.inventory.find(x=>x.uid===el.dataset.uid);if(!i||i.dur===0)return;
+  const d=statChange(()=>{const old=S.installed[i.slot];if(old)S.inventory.push(old);S.installed[i.slot]=i;S.inventory=S.inventory.filter(x=>x.uid!==i.uid);partCache.clear()});
+  SFX.up();hap('success');const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');
+  toast('🔩 Installed '+TIERS[i.tier]+' '+SLOTNAME[i.slot]+(ds?' — <b style="color:var(--acid)">'+ds+'</b>':''),'acid')},
+ repair(el){const f=findPart(el.dataset.uid);if(!f)return;const c=repairCost(f.p);if(S.gold<c)return toast('Not enough gold','bad');
+  const d=statChange(()=>{S.gold-=c;f.p.dur=100});SFX.coin();
+  const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');toast('🔧 Repaired'+(ds?' — '+ds:''),'gold')},
+ 'repair-all'(){let miss=0;for(const s in S.installed)miss+=100-S.installed[s].dur;for(const i of S.inventory)miss+=100-i.dur;
+  const cost=Math.max(1,Math.ceil(miss*.02));if(miss===0)return toast('Everything is already pristine ✨');
+  if(S.crystals<cost)return toast('Need '+cost+' 💎','bad');
+  statChange(()=>{S.crystals-=cost;for(const s in S.installed)S.installed[s].dur=100;for(const i of S.inventory)i.dur=100});
+  SFX.up();toast('💎 Full repair done (−'+cost+' 💎) — bars restored','gold')},
+ upgrade(el){const f=findPart(el.dataset.uid);if(!f||f.p.lvl>=5)return;const cost=80*f.p.lvl*(f.p.tier+1);
+  if(S.gold<cost)return toast('Not enough gold','bad');const ch=[0,90,80,70,60][f.p.lvl];const ok=ri(1,100)<=ch;
+  const d=statChange(()=>{S.gold-=cost;if(ok)f.p.lvl++;else f.p.dur=clamp(f.p.dur-25,5,100)});
+  if(ok){SFX.up();hap('success');const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');toast('⬆ Success! +'+f.p.lvl+(ds?' — <b style="color:var(--acid)">'+ds+'</b>':''),'acid')}
+  else{SFX.fail();hap('error');toast('💢 Upgrade FAILED — durability −25%','bad')}},
+ 'upgrade-cr'(){const f=findPart(el.dataset.uid);if(!f||f.p.lvl>=5)return;const cost=8*(f.p.tier+1);
+  if(S.crystals<cost)return toast('Need '+cost+' 💎','bad');
+  const d=statChange(()=>{S.crystals-=cost;f.p.lvl++});SFX.up();
+  const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');toast('💎 Guaranteed +'+f.p.lvl+(ds?' — '+ds:''),'gold')},
+ 'shop-tab'(el){APP.shopTab=el.dataset.tab;renderShop();SFX.click()},
+ 'buy-part'(el){const slot=el.dataset.slot,t=+el.dataset.tier;const useCr=t>=3&&PRICE_C[t]>0;const price=useCr?PRICE_C[t]:PRICE_G[t];
+  if(useCr){if(S.crystals<price)return toast('Not enough crystals','bad');S.crystals-=price}else{if(S.gold<price)return toast('Not enough gold','bad');S.gold-=price}
+  S.inventory.push({uid:uid(),slot,tier:t,lvl:1,dur:100});save();updateTop();renderShop();SFX.coin();toast('🛒 '+TIERS[t]+' '+SLOTNAME[slot]+' → inventory. Install it in the garage!','gold')},
+ 'buy-boost'(el){const b=BOOSTERS.find(x=>x.id===el.dataset.id);if(S.gold<b.p)return toast('Not enough gold','bad');
+  S.gold-=b.p;S.boosters[b.id]++;save();updateTop();renderShop();SFX.coin();toast(b.ic+' '+b.n+' purchased — arm it for the next race')},
+ 'arm-boost'(el){const id=el.dataset.id;if(S.boosters[id]<=0)return toast('Buy one first','bad');S.armed[id]=!S.armed[id];save();renderShop();SFX.click()},
+ 'buy-mut'(el){const m=MUTS.find(x=>x.id===el.dataset.id);if(S.crystals<m.p)return toast('Not enough crystals','bad');
+  const d=statChange(()=>{S.crystals-=m.p;S.muts.push(m.id);if(S.mutsOn.length<2)S.mutsOn.push(m.id)});
+  updateTop();renderShop();SFX.up();const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');
+  toast('☠️ '+m.n+' injected'+(ds?' — '+ds:'')+'. Max 2 active.','bad')},
+ 'toggle-mut'(el){const id=el.dataset.id;const on=S.mutsOn.includes(id);
+  if(!on&&S.mutsOn.length>=2)return toast('Max 2 active mutations','bad');
+  const d=statChange(()=>{S.mutsOn=on?S.mutsOn.filter(x=>x!==id):[...S.mutsOn,id]});SFX.click();
+  const ds=Object.keys(d).map(k=>fmtDelta(k,d[k])).join(' · ');if(ds)toast((on?'🧪 Mutation off':'🧪 Mutation on')+' — '+ds)},
+ pack(el){const p=PACKS.find(x=>x.k===el.dataset.k);if(!p)return;
+  const link=STARS_LINKS[p.k];const real=IN_TG&&linkReady(link);
+  APP.checkout={c:p.c,p:p.p,link:real?link:null};
+  $('co-amount').textContent=fmt(p.c)+' CRYSTALS';$('co-price').textContent=p.p+'★';
+  $('co-real').style.display=real?'flex':'none';$('co-real').textContent='⭐ Pay '+p.p+' Stars';
+  $('co-test').style.display=real?'none':'flex';
+  $('co-badge').textContent=real?'TELEGRAM STARS':'TEST MODE';$('co-badge').style.background=real?'#0e7f96':'var(--blood2)';
+  $('co-note').textContent=real?'Official Telegram Stars payment. Crystals are granted after payment.':'Free test grant. Real Stars payment works inside Telegram after setup.';
+  openModal('mdl-checkout')},
+ 'checkout-real'(){if(!APP.checkout||!APP.checkout.link)return;const c=APP.checkout;
+  try{TG.openInvoice(c.link,st=>{if(st==='paid')grantCrystals(c.c,true);
+   else if(st==='cancelled')toast('Payment cancelled');
+   else if(st==='failed'){toast('Payment failed','bad');hap('error')}
+   else toast('Payment status: '+st)})}catch(e){toast('Invoice error','bad')}},
+ 'checkout-pay'(){if(!APP.checkout)return;grantCrystals(APP.checkout.c,false)},
+ daily(){renderDaily();openModal('mdl-daily')},
+ 'daily-claim'(){const today=new Date().toDateString();if(S.lastDaily===today)return;
+  const yest=new Date(Date.now()-864e5).toDateString();S.streak=S.lastDaily===yest?S.streak+1:1;if(S.streak>7)S.streak=1;
+  const d=DAILY[S.streak-1];S.gold+=d.g;S.crystals+=d.c;S.lastDaily=today;save();updateTop();renderDaily();SFX.win();hap('success');toast('🎁 Day '+S.streak+': +'+d.g+'🟡 +'+d.c+'💎','gold')},
+ ad(){const today=new Date().toDateString();if(S.adsDate!==today){S.adsDate=today;S.adsUsed=0}
+  if(S.adsUsed>=5)return toast('Daily ad limit reached (5/5) — come back tomorrow','bad');
+  openModal('mdl-ad');$('btn-ad-collect').disabled=true;let t=5;$('ad-timer').textContent=t;$('ad-left').textContent='Ads watched today: '+S.adsUsed+'/5';
+  APP.adTimer=setInterval(()=>{t--;$('ad-timer').textContent=t;if(t<=0){clearInterval(APP.adTimer);APP.adTimer=null;$('btn-ad-collect').disabled=false;$('ad-timer').textContent='0'}},1000)},
+ 'ad-collect'(){S.gold+=150;S.adsUsed++;save();updateTop();closeModals();SFX.coin();toast('📺 +150 🟡 — thanks for watching NECRO-COLA','gold')},
+ market(el){$('mk-'+el.dataset.id).classList.toggle('open');SFX.click()},
+ 'bet-sel'(el){APP.sel={market:el.dataset.m,sel:el.dataset.s,label:el.dataset.l,odds:+el.dataset.o};renderBets();SFX.click()},
+ 'bet-cur'(el){APP.betCur=el.dataset.cur;renderSlip()},
+ 'bet-place'(){if(!APP.sel)return toast('Pick an outcome first','bad');const st=Math.floor(+$('slip-stake').value||0);
+  if(st<10)return toast('Minimum stake is 10','bad');
+  const bal=APP.betCur==='gold'?S.gold:S.crystals;if(st>bal)return toast('Not enough '+(APP.betCur==='gold'?'gold':'crystals'),'bad');
+  if(APP.betCur==='gold')S.gold-=st;else S.crystals-=st;S.career.wagered+=st;
+  S.bets.push({...APP.sel,stake:st,cur:APP.betCur});APP.sel=null;save();updateTop();renderBets();SFX.coin();hap('light');toast('🎟 Bet placed — good luck!')},
+ 'bet-cancel'(el){const b=S.bets[+el.dataset.i];if(!b)return;if(b.cur==='gold')S.gold+=b.stake;else S.crystals+=b.stake;
+  S.bets.splice(+el.dataset.i,1);save();updateTop();renderBets();toast('Bet refunded')},
+ newlineup(){for(const b of S.bets){if(b.cur==='gold')S.gold+=b.stake;else S.crystals+=b.stake}
+  if(S.bets.length)toast('Bets refunded — new opponents');S.bets=[];buildLineup();save();updateTop();renderBets();SFX.click()},
+ 'race-speed'(){APP.speed=APP.speed===1?2:1;$('btn-speed').textContent='⏩ Speed ×'+APP.speed},
+ 'race-pause'(){if(!R.state||R.state.settled)return;APP.paused=true;$('ov-pause').classList.add('active');if(AU.crowdGain)AU.crowdGain.gain.value=.015;syncBack()},
+ resume(){APP.paused=false;$('ov-pause').classList.remove('active');if(AU.crowdGain)AU.crowdGain.gain.value=.045;syncBack()},
+ restart(){if(APP.screen!=='race')return;$('ov-pause').classList.remove('active');initRace();toast('🔁 Fresh start — same runners, new fate')},
+ quit(){if(R.state&&!R.state.settled&&S.bets.length)quitRace(true);else quitRace(false)},
+ rematch(){nav('race')},'res-garage'(){crowdStop();AU.pat='menu';R.state=null;nav('hub')},'res-hub'(){crowdStop();AU.pat='menu';R.state=null;nav('hub')},
+ randlook(){S.cos.skin=pick(['#6a9c59','#7ba05b','#5d8a6e','#8aa06a','#6f9c8a','#9c5959']);S.cos.shirt=pick(['#4a3b6b','#6b3b3b','#3b5a6b','#5a6b3b','#e5383b','#28e0ff']);
+  S.cos.pants=pick(['#2f2a45','#3a2f2f','#22303a','#1c1c2e']);S.cos.decal=pick(['','BC','NF','MO','66']);partCache.clear();save();renderHub();SFX.click()},
+ resetlook(){S.cos={skin:'#6a9c59',shirt:'#4a3b6b',pants:'#2f2a45',aura:0,decal:''};partCache.clear();save();renderHub()},
+ 'export-card'(){const c=mkcv(320,400),x=c.getContext('2d');x.imageSmoothingEnabled=false;
+  const g=x.createLinearGradient(0,0,0,400);g.addColorStop(0,'#241740');g.addColorStop(1,'#08060f');x.fillStyle=g;x.fillRect(0,0,320,400);
+  x.strokeStyle='#ff2bd6';x.lineWidth=3;x.strokeRect(6,6,308,388);ptext(x,'ZOMDASH',90,20,'#ff2bd6',3);
+  drawZombie(x,80,60,zombieRig(S.cos,playerParts()),0,{scale:10});
+  ptext(x,S.zname||'BOBBY',160-((S.zname||'BOBBY').length*8)/2,300,'#8dff3a',2);
+  const st=curStats();ptext(x,'SPD '+st.speed.toFixed(1)+'  STA '+Math.round(st.stamina),50,325,'#28e0ff',2);
+  ptext(x,'AWR '+Math.round(st.awareness)+'  STB '+Math.round(st.stability),50,345,'#ffb703',2);
+  ptext(x,LEAGUES[league()].n+' LEAGUE',80,370,'#f2ead8',2);
+  const a=document.createElement('a');a.download='zomdash-card.png';a.href=c.toDataURL('image/png');a.click();SFX.coin();toast('📸 Card exported!')},
+ 'save-export'(){const a=document.createElement('a');a.download='zomdash-save.json';a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.click();toast('💾 Save exported')},
+ 'save-import'(){$('file-import').click()},
+ 'reset-save'(el){if(!APP.resetArm){APP.resetArm=true;el.textContent='⚠️ Click again to WIPE';setTimeout(()=>{APP.resetArm=false;el.textContent='🗑 Reset save'},3000);return}
+  try{localStorage.removeItem(SAVE_KEY)}catch(e){}location.reload()}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const fn=ACT[el.dataset.act];if(fn)fn(el)});
+document.addEventListener('input',e=>{const id=e.target.id;
+ if(id==='cos-skin'||id==='cos-shirt'||id==='cos-pants'){S.cos[id.slice(4)]=e.target.value;partCache.clear();save()}
+ else if(id==='inp-zname'){S.zname=e.target.value.toUpperCase().replace(/[^A-Z0-9 '\-]/g,'').slice(0,14)||'BOBBY';save()}
+ else if(id==='slip-stake')renderSlip()});
+document.addEventListener('change',e=>{const id=e.target.id;
+ if(id==='cos-aura'){S.cos.aura=e.target.value==='1'?1:0;save()}
+ else if(id==='cos-decal'){S.cos.decal=e.target.value;partCache.clear();save()}
+ else if(id==='f-slot'||id==='f-tier')renderShop();
+ else if(id==='set-diff'){S.set.diff=+e.target.value;save();toast('🤖 Applies to the next generated opponents')}
+ else if(id==='file-import'){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(d.v!==2)throw 0;S=d;if(!S.helpLang)S.helpLang='ru';prevStats=null;save();closeModals();buildLineup();nav('hub');toast('📂 Save imported!','acid')}catch(err){toast('Invalid save file','bad')}};r.readAsText(f);e.target.value=''}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(APP.screen==='race'&&R.state&&!R.state.settled){APP.paused?ACT.resume():ACT['race-pause']()}else closeModals()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&APP.screen==='race'&&R.state&&!R.state.settled&&!APP.paused)ACT['race-pause']()});
+/* ---------- 14. BOOT / LOOP ---------- */
+buildSky();setMute();
+if(TG){try{TG.ready();TG.expand();TG.setHeaderColor('#08060f');TG.setBackgroundColor('#08060f')}catch(e){}
+ try{if(TG.disableVerticalSwipeClosing)TG.disableVerticalSwipeClosing()}catch(e){}
+ try{if(TG.BackButton)TG.BackButton.onClick(tgBack)}catch(e){}
+ if(IN_TG&&TG.initDataUnsafe&&TG.initDataUnsafe.user&&!S.name){$('inp-player').value=(TG.initDataUnsafe.user.first_name||'').slice(0,14)}}
+if(S.name){$('inp-player').value=S.name;$('btn-enter').innerHTML='🏁 Continue as '+S.name}
+function loop(t){requestAnimationFrame(loop);const now=t/1000;const dt=Math.min(.05,(t-lastT)/1000||.016);lastT=t;
+ if(APP.screen==='hub')renderPrev(now);
+ if(APP.screen==='race'&&R.state){if(!APP.paused&&!R.state.settled){acc+=dt*APP.speed;const fx=[];let steps=0;
+   while(acc>=1/60&&steps++<10){stepRace(R.state,1/60,fx);acc-=1/60}raceFX(fx)}
+  renderRace(APP.paused?0:dt)}}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
